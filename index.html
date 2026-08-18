@@ -1535,7 +1535,6 @@
             return new Intl.DateTimeFormat('en-CA', options).format(new Date());
         }
 
-        // অটোমেটিক পাসওয়ার্ড জেনারেটর ফাংশন (তারিখ অনুযায়ী ডাইনামিক পাসওয়ার্ড তৈরি করবে)
         window.updateDailyPasswords = function() {
             const options = { timeZone: 'Asia/Dhaka', day: '2-digit', month: 'short' };
             const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(new Date());
@@ -1544,7 +1543,6 @@
             let month = parts.find(p => p.type === 'month').value;
             let dateStr = `${day} ${month}`;
 
-            // ডায়নামিক পাসওয়ার্ড জেনারেশন লজিক
             const gmailPass = `@MyJob_MKR${day}`;
             const fbInstaPass = `MYJOB_MKR${day}`;
 
@@ -1609,6 +1607,8 @@
                     updateTaskCounters();
                     loadUserTaskHistory();
                 }
+            }, (error) => {
+                console.error("Firebase Sync Error: ", error);
             });
         }
 
@@ -1883,20 +1883,25 @@
                 status: 'Loading'
             };
 
-            set(ref(db, 'tasks/' + taskId), newTask).then(() => {
-                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: CHAT_ID, text: message })
-                }).then(res => res.json()).then(data => {
-                    if(data.ok) {
-                        alert('সফলভাবে কাজ সাবমিট হয়েছে!');
-                        event.target.reset();
-                        syncUserTasksFromFirebase();
-                        showPage('homePage');
-                    }
+            set(ref(db, 'tasks/' + taskId), newTask)
+                .then(() => {
+                    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+                    }).then(res => res.json()).then(data => {
+                        if(data.ok) {
+                            alert('সফলভাবে কাজ সাবমিট হয়েছে!');
+                            event.target.reset();
+                            syncUserTasksFromFirebase();
+                            showPage('homePage');
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Task Submit Error: ", error);
+                    alert('সাবমিট করতে সমস্যা হচ্ছে! দয়া করে ফায়ারবেজ ডাটাবেজ রুলস (Rules) চেক করুন অথবা ইন্টারনেট কানেকশন যাচাই করুন।');
                 });
-            });
         }
 
         window.updateTaskCounters = function() {
@@ -2002,6 +2007,8 @@
                         </tr>
                     `;
                 });
+            }, (error) => {
+                console.error("Admin Load Error: ", error);
             });
         }
 
