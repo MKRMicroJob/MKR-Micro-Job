@@ -969,7 +969,7 @@
 
         <div class="notice-bar">
             <i class="fa-solid fa-bullhorn"></i>
-            <span>MKR Micro Job | কাজ করে সহজেই আয় করুন ঘরে বসে।</span>
+            <span>MKR Micro Job | কাজ করে সহজেই আয় করুন ঘরে বসে। (পাসওয়ার্ড প্রতিদিন রাত ১০:০০ টায় অটো আপডেট হয়)</span>
         </div>
 
         <div class="dashboard">
@@ -1331,7 +1331,7 @@
 
             <div class="password-box">
                 <div class="pass-text">
-                    <span>Today's Password (<span id="currentDateLabel1"></span>):</span>
+                    <span>Today's Password (<span id="currentDateLabel1"></span>) [রাত ১০টায় পরিবর্তন]:</span>
                     <strong id="passText1">@MyJob_MKR16</strong>
                 </div>
                 <button class="copy-btn" onclick="copyPassword('passText1', this)"><i class="fa-solid fa-copy"></i> Copy</button>
@@ -1386,7 +1386,7 @@
 
             <div class="password-box">
                 <div class="pass-text">
-                    <span>Today's Password (<span id="currentDateLabel2"></span>):</span>
+                    <span>Today's Password (<span id="currentDateLabel2"></span>) [রাত ১০টায় পরিবর্তন]:</span>
                     <strong id="passText2">MYJOB_MKR16</strong>
                 </div>
                 <button class="copy-btn" onclick="copyPassword('passText2', this)"><i class="fa-solid fa-copy"></i> Copy</button>
@@ -1448,7 +1448,7 @@
 
             <div class="password-box">
                 <div class="pass-text">
-                    <span>Today's Password (<span id="currentDateLabel3"></span>):</span>
+                    <span>Today's Password (<span id="currentDateLabel3"></span>) [রাত ১০টায় পরিবর্তন]:</span>
                     <strong id="passText3">MYJOB_MKR16</strong>
                 </div>
                 <button class="copy-btn" onclick="copyPassword('passText3', this)"><i class="fa-solid fa-copy"></i> Copy</button>
@@ -1502,10 +1502,16 @@
         const ADMIN_PANEL_SECRET_NUMBER = '01841161787';
 
         function updateDailyPasswords() {
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, '0');
+            const now = new Date();
+            // রাত ১০টা (22:00) বা তার পরে হলে পাসওয়ার্ড পরবর্তী দিনের ডেট অনুযায়ী দেখাবে
+            let targetDate = new Date(now);
+            if (now.getHours() >= 22) {
+                targetDate.setDate(targetDate.getDate() + 1);
+            }
+
+            const day = String(targetDate.getDate()).padStart(2, '0');
             const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const month = monthNames[today.getMonth()];
+            const month = monthNames[targetDate.getMonth()];
             const dateStr = `${day} ${month}`;
 
             const gmailPass = `@MyJob_MKR${day}`;
@@ -1868,7 +1874,6 @@
             }
 
             tbody.innerHTML = '';
-            tasks.keys = true;
             tasks.forEach((task, index) => {
                 let uName = task.userName || 'Unknown User';
                 let status = task.status || 'Pending';
@@ -1893,13 +1898,11 @@
         function updateTaskStatus(index, newStatus) {
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             
-            // একই কাজ ইতিপূর্বে সাকসেস হয়ে থাকলে পুনরায় আবার সাকসেস করে ব্যালেন্স যোগ হওয়া আটকানোর চেক
             if (tasks[index].status === 'Success' && newStatus === 'Success') {
                 alert('এই কাজটি ইতিপূর্বেই সাকসেস করা হয়েছে!');
                 return;
             }
 
-            // যদি স্ট্যাটাস আগে সাকসেস না থাকে এবং এখন সাকসেস করা হয়, তবেই ব্যালেন্স একবার যোগ হবে
             if (tasks[index].status !== 'Success' && newStatus === 'Success') {
                 let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
                 let addAmt = tasks[index].rate || (tasks[index].platform === 'Gmail' ? 15.70 : (tasks[index].platform === 'Facebook' ? 5.70 : 4.00));
