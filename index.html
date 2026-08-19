@@ -3,613 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MKR ABUL KALAM RM</title>
+    <title>MKRABULKALAMRM | Official</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f0f4f8; display: flex; justify-content: center; }
+        .main-container { width: 100%; max-width: 480px; background: #ffffff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative; }
+        .hidden { display: none !important; }
 
-        body {
-            background-color: #f0f4f8;
-            display: flex;
-            justify-content: center;
-        }
+        /* Navbar & Sidebar */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .menu-icon { font-size: 24px; cursor: pointer; }
+        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #181c24; color: white; z-index: 1000; transition: 0.3s; }
+        .sidebar.active { left: 0; }
+        .menu-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #334155; }
+        .menu-item:hover { background: #2563eb; }
 
-        .main-container {
-            width: 100%;
-            max-width: 480px;
-            background: #ffffff;
-            min-height: 100vh;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* --- Sidebar Menu --- */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            height: 100%;
-            background: #ffffff;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-            transition: 0.3s ease;
-            overflow-y: auto;
-        }
-
-        .sidebar.active {
-            left: 0;
-        }
-
-        .sidebar-header {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            padding: 30px 20px;
-            text-align: center;
-            color: white;
-        }
-
-        .sidebar-user-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px auto;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .sidebar-header h3 {
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .verified-badge {
-            background: #ffffff;
-            color: #1e3c72;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-block;
-        }
-
-        .sidebar-menu {
-            padding: 15px 0;
-        }
-
-        .menu-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: #334155;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .menu-item:hover {
-            background: #f1f5f9;
-            color: #2563eb;
-        }
-
-        .menu-item span {
-            font-size: 18px;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: 999;
-            display: none;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        /* --- Common Styles --- */
-        .auth-container {
-            padding: 30px 20px;
-            text-align: center;
-        }
-
-        .auth-title {
-            font-size: 24px;
-            color: #1e3c72;
-            margin: 20px 0 5px 0;
-        }
-
-        .auth-subtitle {
-            font-size: 14px;
-            color: #64748b;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            color: #334155;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            outline: none;
-            font-size: 14px;
-            background-color: #f8fafc;
-        }
-
-        .auth-btn, .submit-action-btn {
-            width: 100%;
-            padding: 12px;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .menu-icon {
-            font-size: 24px;
-            color: #1e3c72;
-            cursor: pointer;
-        }
-
-        .site-title {
-            font-size: 15px;
-            font-weight: bold;
-            color: #1e3c72;
-            letter-spacing: 0.5px;
-        }
-
-        .profile-icon {
-            width: 35px;
-            height: 35px;
-            background: #f1f5f9;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* --- Dashboard --- */
-        .balance-section {
-            padding: 20px;
-        }
-
-        .balance-card {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: white;
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-        }
-
-        .balance-card p {
-            font-size: 14px;
-            letter-spacing: 1px;
-            color: #cbd5e1;
-            margin-bottom: 5px;
-        }
-
-        .balance-card h2 {
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .btn-deposit, .btn-withdraw {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .btn-deposit { background-color: #2563eb; color: white; }
-        .btn-withdraw { background-color: #334155; color: white; }
-
-        .services-section {
-            padding: 0 20px 20px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .section-heading {
-            font-size: 16px;
-            font-weight: bold;
-            color: #1e293b;
-            margin-bottom: 5px;
-            border-left: 4px solid #2563eb;
-            padding-left: 8px;
-        }
-
-        .service-card {
-            background: #ffffff;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-            border: 1px solid #e2e8f0;
-        }
-
-        .service-card img { width: 30px; height: 30px; }
-        .service-card span { font-weight: bold; color: #334155; }
-
-        /* --- Sell & Other Pages Common --- */
+        /* Elements */
         .sell-container { padding: 20px; }
-        .banner-card {
-            background: #2563eb; color: white; padding: 20px;
-            border-radius: 15px; text-align: center; margin-bottom: 15px;
-        }
-        .banner-card h3 { font-size: 20px; margin-bottom: 5px; }
-        .banner-card p { font-size: 13px; margin-bottom: 15px; color: #e0e7ff; }
-
-        .submit-form-box {
-            background: #ffffff; padding: 20px; border-radius: 15px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
-        }
-        .submit-form-box h3 { font-size: 18px; color: #1e3c72; text-align: center; }
-        .submit-form-box p { font-size: 12px; color: #64748b; text-align: center; margin-bottom: 15px; }
-
-        /* --- Refer & Earn Page Specific Styles --- */
-        .refer-card {
-            background: linear-gradient(135deg, #2563eb, #1e40af);
-            color: white;
-            padding: 25px 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .refer-card h2 {
-            font-size: 32px;
-            margin: 10px 0;
-            color: #fde047;
-        }
-
-        .refer-rules {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .refer-rules h4 {
-            font-size: 15px;
-            color: #1e3c72;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #cbd5e1;
-            padding-bottom: 5px;
-        }
-
-        .refer-rules ul {
-            padding-left: 20px;
-            font-size: 13px;
-            color: #334155;
-            line-height: 1.6;
-        }
-
-        .link-box {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .link-box input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            background: #f1f5f9;
-            font-size: 13px;
-            color: #475569;
-        }
-
-        .copy-link-btn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 0 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 13px;
-        }
+        .banner-card { background: #2563eb; color: white; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #334155; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: #f8fafc; outline: none; }
+        .submit-btn { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .stat-box { background: #ffffff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; flex: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-
-        <!-- Sidebar Overlay -->
-        <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
-
-        <!-- Sidebar Menu -->
-        <div id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-user-icon">User</div>
-                <h3>mkamalmk</h3>
-                <div class="verified-badge">Verified Member</div>
-            </div>
-            <div class="sidebar-menu">
-                <div class="menu-item" onclick="openDashboard(); toggleSidebar();"><span>📊</span> Dashboard</div>
-                <div class="menu-item" onclick="openReferEarn(); toggleSidebar();"><span>🎁</span> Refer & Earn</div>
-                <div class="menu-item" onclick="toggleSidebar()"><span>💰</span> Income</div>
-                <div class="menu-item" onclick="openGmailSell(); toggleSidebar();"><span>📧</span> Gmail Sell</div>
-                <div class="menu-item" onclick="openFbSell(); toggleSidebar();"><span>📘</span> Facebook Sell</div>
-                <div class="menu-item" onclick="openInstaSell(); toggleSidebar();"><span>📷</span> Instagram Sell</div>
-                <div class="menu-item" onclick="openWithdraw(); toggleSidebar();"><span>📥</span> Withdraw</div>
-                <div class="menu-item" onclick="toggleSidebar()"><span>💳</span> Deposit</div>
-                <div class="menu-item" onclick="toggleSidebar()"><span>📋</span> History</div>
-            </div>
-        </div>
-
-        <!-- ১. লগইন পেজ -->
-        <div id="loginPage" class="auth-container">
-            <h2 class="auth-title">স্বাগতম!</h2>
-            <p class="auth-subtitle">আপনার অ্যাকাউন্টে লগইন করতে নিচের তথ্যগুলো দিন</p>
-            
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" placeholder="Enter your email">
-            </div>
-            
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" placeholder="Enter your password">
-            </div>
-
-            <button class="auth-btn" onclick="handleLogin()">লগইন করুন</button>
-        </div>
-
-        <!-- ২. ড্যাশবোর্ড পেজ -->
-        <div id="dashboardPage" class="hidden">
-            <header class="navbar">
-                <div class="menu-icon" onclick="toggleSidebar()">&#9776;</div>
-                <div class="site-title">MKR ABUL KALAM RM</div>
-                <div class="profile-icon">📄</div>
-            </header>
-
-            <section class="balance-section">
-                <div class="balance-card">
-                    <p>TOTAL BALANCE</p>
-                    <h2>৳24.90</h2>
-                    <div class="btn-group">
-                        <button class="btn-deposit">Deposit</button>
-                        <button class="btn-withdraw" onclick="openWithdraw()">Withdraw</button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="services-section">
-                <h3 class="section-heading">আমাদের ডিজিটাল সেবা সমূহ</h3>
-                <div class="service-card" onclick="openGmailSell()">
-                    <img src="https://img.icons8.com/color/48/gmail-new.png" alt="Gmail">
-                    <span>Gmail Sell</span>
-                </div>
-                <div class="service-card" onclick="openInstaSell()">
-                    <img src="https://img.icons8.com/color/48/instagram-new--v1.png" alt="Instagram">
-                    <span>Instagram Sell</span>
-                </div>
-                <div class="service-card" onclick="openFbSell()">
-                    <img src="https://img.icons8.com/color/48/facebook-new.png" alt="Facebook">
-                    <span>Facebook Sell</span>
-                </div>
-            </section>
-        </div>
-
-        <!-- ৩. জিমেইল সেল পেজ -->
-        <div id="gmailSellPage" class="hidden">
-            <header class="navbar">
-                <div class="menu-icon" onclick="openDashboard()">&#8592;</div>
-                <div class="site-title">MKR ABUL KALAM RM</div>
-                <div class="profile-icon">📄</div>
-            </header>
-
-            <div class="sell-container">
-                <div class="banner-card">
-                    <h3>Gmail Account Sell</h3>
-                    <p>জিমেইল অ্যাকাউন্ট সেল করে টাকা ইনকাম করুন</p>
-                </div>
-                <div class="submit-form-box">
-                    <h3>Submit Your Account</h3>
-                    <div class="form-group">
-                        <label>Gmail Address</label>
-                        <input type="email" placeholder="example@gmail.com">
-                    </div>
-                    <button class="submit-action-btn">SUBMIT GMAIL ACCOUNT</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ৪. ইনস্টাগ্রাম সেল পেজ -->
-        <div id="instaSellPage" class="hidden">
-            <header class="navbar">
-                <div class="menu-icon" onclick="openDashboard()">&#8592;</div>
-                <div class="site-title">MKR ABUL KALAM RM</div>
-                <div class="profile-icon">📄</div>
-            </header>
-            <div class="sell-container">
-                <div class="banner-card">
-                    <h3>Instagram Account Sell</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- ৫. ফেসবুক সেল পেজ -->
-        <div id="fbSellPage" class="hidden">
-            <header class="navbar">
-                <div class="menu-icon" onclick="openDashboard()">&#8592;</div>
-                <div class="site-title">MKR ABUL KALAM RM</div>
-                <div class="profile-icon">📄</div>
-            </header>
-            <div class="sell-container">
-                <div class="banner-card">
-                    <h3>Facebook Account Sell</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- ৬. উইথড্র পেজ -->
-        <div id="withdrawPage" class="hidden">
-            <header class="navbar">
-                <div class="menu-icon" onclick="openDashboard()">&#8592;</div>
-                <div class="site-title">MKR ABUL KALAM RM</div>
-                <div class="profile-icon">📄</div>
-            </header>
-            <div class="sell-container">
-                <div class="banner-card">
-                    <h3>Withdraw Funds</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- ৭. রেফার অ্যান্ড আর্ন পেজ -->
-        <div id="referEarnPage" class="hidden">
-            <header class="navbar">
-                <div class="menu-icon" onclick="openDashboard()">&#8592;</div>
-                <div class="site-title">MKR ABUL KALAM RM</div>
-                <div class="profile-icon">📄</div>
-            </header>
-
-            <div class="sell-container">
-                <div class="refer-card">
-                    <p>REFERRAL BONUS</p>
-                    <h2>৳10.00</h2>
-                    <p>বন্ধুদের রেফার করে আয় করুন</p>
-                </div>
-
-                <div class="refer-rules">
-                    <h4>📌 রেফার বোনাসের নিয়মাবলি:</h4>
-                    <ul>
-                        <li>প্রতিটি সফল রেফারে আপনি পাবেন <b>১০ টাকা</b> বোনাস।</li>
-                        <li>যাকে রেফার করবেন, তিনি সেদিন অ্যাকাউন্ট খুলে <b>কমপক্ষে একটি কাজ সম্পন্ন করে পেমেন্ট পাওয়ার পরই</b> আপনি রেফারের বোনাসের টাকা পাবেন।</li>
-                    </ul>
-                </div>
-
-                <div class="submit-form-box">
-                    <h3>Your Referral Link</h3>
-                    <p>আপনার বন্ধুদের সাথে এই টেলিগ্রাম বট লিংকটি শেয়ার করুন</p>
-                    <div class="link-box">
-                        <input type="text" id="referLink" value="https://t.me/abulkalam_mkr_bot?start=mkamalmk" readonly>
-                        <button class="copy-link-btn" onclick="copyReferLink()">Copy</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+<div class="main-container">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <div style="padding: 30px; text-align: center;"><h3>MKRABULKALAMRM</h3></div>
+        <div class="menu-item" onclick="showPage('dashboardPage')">📊 Dashboard</div>
+        <div class="menu-item" onclick="showPage('instaSellPage')">📷 Instagram Sell</div>
+        <div class="menu-item" onclick="showPage('fbSellPage')">👥 Facebook Task</div>
+        <div class="menu-item" onclick="showPage('gmailSellPage')">✉️ Gmail Task</div>
+        <div class="menu-item" onclick="showPage('withdrawPage')">💳 Withdraw Money</div>
+        <div class="menu-item" onclick="showPage('referPage')">🎁 Refer & Earn</div>
+        <div class="menu-item" onclick="showPage('adminContactPage')">💬 Admin Support</div>
     </div>
 
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
+    <!-- Dashboard -->
+    <div id="dashboardPage">
+        <header class="navbar"><div class="menu-icon" onclick="toggleSidebar()">☰</div><div>MKRABULKALAMRM</div><div></div></header>
+        <div class="sell-container">
+            <div class="banner-card">
+                <p style="font-size: 12px; letter-spacing: 1px; color: #cbd5e1; margin-bottom: 5px;">TOTAL BALANCE</p>
+                <h2>৳0.00</h2>
+            </div>
+            <button class="submit-btn" onclick="showPage('withdrawPage')" style="background: #16a34a; margin-top: 10px;">💸 Withdraw Now</button>
+        </div>
+    </div>
+
+    <!-- Instagram Sell Page -->
+    <div id="instaSellPage" class="hidden">
+        <header class="navbar"><div class="menu-icon" onclick="showPage('dashboardPage')">←</div><div>Instagram Sell</div></header>
+        <div class="sell-container">
+            <div class="banner-card">
+                <h3>Instagram Account Sell</h3>
+                <p style="font-size: 13px; color: #cbd5e1; margin-top: 5px;">প্রতিটি কাজের নিশ্চিত রেট নিচে দেওয়া আছে</p>
+            </div>
+
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: #1e293b; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;">📋 কাজের রেট তালিকা:</h4>
+                <div style="font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between;"><span>ইনস্টাগ্রাম স্পেশাল টাস্ক:</span> <strong style="color: #16a34a;">$3.50</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>নরমাল ইনস্টাগ্রাম একাউন্ট:</span> <strong style="color: #16a34a;">৳৫০</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>পুরাতন/ভেরিফাইড একাউন্ট:</span> <strong style="color: #16a34a;">৳১০০</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>প্রতি রেফার বোনাস:</span> <strong style="color: #16a34a;">৳১০</strong></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Instagram Username</label>
+                <input type="text" placeholder="Enter Username">
+            </div>
+            <div class="form-group">
+                <label>Account Password</label>
+                <input type="text" placeholder="Enter Password">
+            </div>
+            <div style="text-align:center; padding:15px; border:2px dashed #2563eb; border-radius:10px; margin-bottom:15px; background: #f8fafc;">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Today's Password:</p>
+                <h3 id="instaPassText" style="color: #1e293b; font-family: monospace;">MKRABULKALAMRM11</h3>
+            </div>
+            <button class="submit-btn" onclick="alert('Instagram অ্যাকাউন্ট সাবমিট করা হয়েছে!')">SUBMIT ACCOUNT</button>
+        </div>
+    </div>
+
+    <!-- Facebook Task Page -->
+    <div id="fbSellPage" class="hidden">
+        <header class="navbar"><div class="menu-icon" onclick="showPage('dashboardPage')">←</div><div>Facebook Task</div></header>
+        <div class="sell-container">
+            <div class="banner-card" style="background: #1877f2;">
+                <h3>Facebook Task & Sell</h3>
+                <p style="font-size: 13px; color: #e7f3ff; margin-top: 5px;">প্রতি ফেসবুক কাজের রেট: <strong style="color: #ffeb3b;">৳৬</strong></p>
+            </div>
+
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: #1e293b; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;">📋 ফেসবুক কাজের রেট তালিকা:</h4>
+                <div style="font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between;"><span>ফেসবুক টাস্ক / পেজ লাইক / ফলো:</span> <strong style="color: #16a34a;">৳৬</strong></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Facebook Profile Link / Username</label>
+                <input type="text" placeholder="Enter FB Link or Username">
+            </div>
+            <div class="form-group">
+                <label>Task Proof / Details</label>
+                <input type="text" placeholder="Enter details or proof">
+            </div>
+            <button class="submit-btn" style="background: #1877f2;" onclick="alert('ফেসবুক টাস্ক সাবমিট করা হয়েছে!')">SUBMIT FB TASK</button>
+        </div>
+    </div>
+
+    <!-- Gmail Task Page -->
+    <div id="gmailSellPage" class="hidden">
+        <header class="navbar"><div class="menu-icon" onclick="showPage('dashboardPage')">←</div><div>Gmail Task</div></header>
+        <div class="sell-container">
+            <div class="banner-card" style="background: #ea4335;">
+                <h3>Gmail Account Task</h3>
+                <p style="font-size: 13px; color: #fce8e6; margin-top: 5px;">প্রতি জিমেইল ক্রিয়েট/টাস্ক রেট: <strong style="color: #ffeb3b;">৳১৫</strong></p>
+            </div>
+
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: #1e293b; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;">📋 জিমেইল কাজের রেট তালিকা:</h4>
+                <div style="font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between;"><span>জিমেইল ক্রিয়েট টাস্ক:</span> <strong style="color: #16a34a;">৳১৫</strong></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Gmail Address</label>
+                <input type="email" placeholder="Enter Gmail Address">
+            </div>
+            <div class="form-group">
+                <label>Gmail Password</label>
+                <input type="text" placeholder="Enter Gmail Password">
+            </div>
+            <button class="submit-btn" style="background: #ea4335;" onclick="alert('জিমেইল টাস্ক সাবমিট করা হয়েছে!')">SUBMIT GMAIL TASK</button>
+        </div>
+    </div>
+
+    <!-- Withdraw Page -->
+    <div id="withdrawPage" class="hidden">
+        <header class="navbar"><div class="menu-icon" onclick="showPage('dashboardPage')">←</div><div>Withdraw Money</div></header>
+        <div class="sell-container">
+            <div class="banner-card" style="background: #0f172a;">
+                <h3>Withdraw Balance</h3>
+                <p style="font-size: 13px; color: #94a3b8; margin-top: 5px;">উইথড্র চার্জ: <span style="color: #38bdf8; font-weight: bold;">৫% (5%)</span> কেটে রাখা হবে</p>
+            </div>
+            
+            <div class="form-group">
+                <label>পেমেন্ট মেথড সিলেক্ট করুন</label>
+                <select id="withdrawMethod">
+                    <option value="bkash">Bkash</option>
+                    <option value="nagad">Nagad</option>
+                    <option value="rocket">Rocket</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>আপনার অ্যাকাউন্ট নম্বর</label>
+                <input type="text" id="accountNo" placeholder="যেমন: 017xxxxxxxx">
+            </div>
+
+            <div class="form-group">
+                <label>টাকার পরিমাণ (টাকা)</label>
+                <input type="number" id="withdrawAmount" placeholder="পরিমাণ লিখুন" oninput="calculateCharge()">
+            </div>
+
+            <div id="chargeBox" style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; color: #334155; display: none;">
+                <p>কাটবে (৫% চার্জ): <span id="feeText" style="color: #dc2626; font-weight: bold;">৳0.00</span></p>
+                <p style="margin-top: 4px;">আপনি পাবেন: <span id="finalText" style="color: #16a34a; font-weight: bold;">৳0.00</span></p>
+            </div>
+
+            <button class="submit-btn" onclick="submitWithdraw()">REQUEST WITHDRAW</button>
+        </div>
+    </div>
+
+    <!-- Refer & Earn (রেফার বোনাস ১০ টাকা যুক্ত করা হলো) -->
+    <div id="referPage" class="hidden">
+        <header class="navbar"><div class="menu-icon" onclick="showPage('dashboardPage')">←</div><div>Refer & Earn</div></header>
+        <div class="sell-container">
+            <div class="banner-card" style="background: #7c3aed;">
+                <h3>Refer & Earn Bonus</h3>
+                <p style="font-size: 13px; color: #ede9fe; margin-top: 5px;">প্রতি রেফারে নিশ্চিত বোনাস: <strong style="color: #ffeb3b;">৳১০</strong></p>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <div class="stat-box">
+                    <span style="font-size: 12px; color: #64748b; font-weight: bold;">মোট আয়</span>
+                    <h4 style="color: #16a34a; font-size: 20px; margin-top: 5px;">৳0.00</h4>
+                </div>
+                <div class="stat-box">
+                    <span style="font-size: 12px; color: #64748b; font-weight: bold;">মোট রেফার</span>
+                    <h4 style="color: #1e293b; font-size: 20px; margin-top: 5px;">0 জন</h4>
+                </div>
+            </div>
+
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; font-size: 13px; line-height: 1.6; color: #334155; margin-bottom: 20px;">
+                <strong>শর্ত:</strong> যাকে রেফার করবেন তাকে অবশ্যই কাজ করতে হবে এবং পেমেন্ট নিতে হবে। তবেই আপনি প্রতি রেফারে <span style="color: #16a34a; font-weight: bold;">৳১০</span> বোনাস পাবেন।
+            </div>
+
+            <div class="form-group">
+                <label>আপনার রেফারেল লিংক</label>
+                <input type="text" value="https://mkrabulkalamrm.com/ref?id=user123" readonly style="background: #e2e8f0; cursor: pointer;" onclick="alert('রেফারেল লিংক কপি করা হয়েছে!')">
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Support -->
+    <div id="adminContactPage" class="hidden">
+        <header class="navbar"><div class="menu-icon" onclick="showPage('dashboardPage')">←</div><div>Admin Support</div></header>
+        <div class="sell-container">
+            <div class="banner-card" style="background: #181c24;">
+                <h3>Admin Support</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 5px;">সরাসরি অ্যাডমিনের সাথে যোগাযোগ করুন</p>
+            </div>
+            <div class="form-group">
+                <label>আপনার নাম</label>
+                <input type="text" placeholder="আপনার নাম লিখুন">
+            </div>
+            <div class="form-group">
+                <label>আপনার সমস্যা</label>
+                <textarea rows="4" placeholder="আপনার সমস্যাটি বিস্তারিত লিখুন..."></textarea>
+            </div>
+            <button class="submit-btn" onclick="alert('আপনার মেসেজটি পাঠানো হয়েছে!')">SEND MESSAGE</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+    function showPage(pageId) {
+        document.getElementById('sidebar').classList.remove('active');
+        document.querySelectorAll('.main-container > div').forEach(div => {
+            if(div.id !== 'sidebar') div.classList.add('hidden');
+        });
+        document.getElementById(pageId).classList.remove('hidden');
+    }
+    
+    function calculateCharge() {
+        let amount = document.getElementById('withdrawAmount').value;
+        let chargeBox = document.getElementById('chargeBox');
+        
+        if(amount && amount > 0) {
+            let fee = (amount * 5) / 100;
+            let finalAmount = amount - fee;
+            
+            document.getElementById('feeText').innerText = '৳' + fee.toFixed(2);
+            document.getElementById('finalText').innerText = '৳' + finalAmount.toFixed(2);
+            chargeBox.style.display = 'block';
+        } else {
+            chargeBox.style.display = 'none';
+        }
+    }
+
+    function submitWithdraw() {
+        let account = document.getElementById('accountNo').value;
+        let amount = document.getElementById('withdrawAmount').value;
+
+        if(!account || !amount) {
+            alert('দয়া করে আপনার অ্যাকাউন্ট নম্বর এবং টাকার পরিমাণ লিখুন।');
+            return;
         }
 
-        function handleLogin() {
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('dashboardPage').classList.remove('hidden');
-        }
+        let fee = (amount * 5) / 100;
+        let finalAmount = amount - fee;
 
-        function hideAllPages() {
-            document.getElementById('dashboardPage').classList.add('hidden');
-            document.getElementById('gmailSellPage').classList.add('hidden');
-            document.getElementById('instaSellPage').classList.add('hidden');
-            document.getElementById('fbSellPage').classList.add('hidden');
-            document.getElementById('withdrawPage').classList.add('hidden');
-            document.getElementById('referEarnPage').classList.add('hidden');
-        }
+        alert('আপনার ' + amount + ' টাকার উইথড্র সফলভাবে সাবমিট হয়েছে!\n৫% চার্জ কাটা হয়েছে: ৳' + fee + '\nআপনি পাবেন: ৳' + finalAmount);
+        
+        document.getElementById('accountNo').value = '';
+        document.getElementById('withdrawAmount').value = '';
+        document.getElementById('chargeBox').style.display = 'none';
+        showPage('dashboardPage');
+    }
 
-        function openDashboard() {
-            hideAllPages();
-            document.getElementById('dashboardPage').classList.remove('hidden');
-        }
-
-        function openGmailSell() {
-            hideAllPages();
-            document.getElementById('gmailSellPage').classList.remove('hidden');
-        }
-
-        function openInstaSell() {
-            hideAllPages();
-            document.getElementById('instaSellPage').classList.remove('hidden');
-        }
-
-        function openFbSell() {
-            hideAllPages();
-            document.getElementById('fbSellPage').classList.remove('hidden');
-        }
-
-        function openWithdraw() {
-            hideAllPages();
-            document.getElementById('withdrawPage').classList.remove('hidden');
-        }
-
-        function openReferEarn() {
-            hideAllPages();
-            document.getElementById('referEarnPage').classList.remove('hidden');
-        }
-
-        function copyReferLink() {
-            let linkInput = document.getElementById('referLink');
-            linkInput.select();
-            linkInput.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(linkInput.value);
-            alert('রেফার লিংক কপি সফল হয়েছে!');
-        }
-    </script>
-
+    window.onload = function() {
+        let day = new Date().getDate();
+        document.getElementById('instaPassText').innerText = "MKRABULKALAMRM" + day;
+    }
+</script>
 </body>
 </html>
