@@ -1791,8 +1791,8 @@
                 return;
             }
 
-            let currentUserName = localStorage.getItem('savedName') || 'User';
-            let currentUserPhone = localStorage.getItem('savedPhone0') || localStorage.getItem('savedPhone') || 'নম্বর পাওয়া যায়নি';
+            let currentUserName = localStorage.getItem('savedName') || 'অজ্ঞাত ইউজার';
+            let currentUserPhone = localStorage.getItem('savedPhone') || 'নম্বর পাওয়া যায়নি';
             
             let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 ইউজারের নাম: ${currentUserName}\n📱 ফোন: ${currentUserPhone}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস:\n${details}`;
 
@@ -1879,8 +1879,26 @@
             }
 
             tbody.innerHTML = '';
-            tasks.forEach((task, index) => {
-                let uName = task.userName || 'Unknown User';
+            tasks.tasks ? tasks.forEach((task, index) => {
+                let uName = task.userName || localStorage.getItem('savedName') || 'ইউজার';
+                let status = task.status || 'Pending';
+                
+                let approveDisabled = status === 'Success' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
+                let rejectDisabled = status === 'Failed' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color: #00f2fe; font-weight: bold;">${uName}</td>
+                        <td>${task.platform}</td>
+                        <td>${task.details}</td>
+                        <td>
+                            <button onclick="updateTaskStatus(${index}, 'Success')" ${approveDisabled}>Approve</button>
+                            <button onclick="updateTaskStatus(${index}, 'Failed')" ${rejectDisabled}>Reject</button>
+                        </td>
+                    </tr>
+                `;
+            }) : tasks.forEach((task, index) => {
+                let uName = task.userName || localStorage.getItem('savedName') || 'ইউজার';
                 let status = task.status || 'Pending';
                 
                 let approveDisabled = status === 'Success' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
