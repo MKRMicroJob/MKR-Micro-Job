@@ -1565,12 +1565,16 @@
             document.getElementById('profEmail').innerText = localStorage.getItem('savedEmail') || 'user@gmail.com';
             
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            document.getElementById('profTotalSubmitted').innerText = tasks.length;
+            let currentName = localStorage.getItem('savedName');
             
-            let totalSub = tasks.length;
-            let pendingCount = tasks.filter(t => t.status === 'Pending' || (!t.status)).length;
-            let successCount = tasks.filter(t => t.status === 'Success').length;
-            let rejectedCount = tasks.filter(t => t.status === 'Failed').length;
+            // ইউজার শুধু নিজের কাজগুলো প্রোফাইলে ফিল্টার করে দেখবে
+            let myTasks = tasks.filter(t => t.userName === currentName);
+            document.getElementById('profTotalSubmitted').innerText = myTasks.length;
+            
+            let totalSub = myTasks.length;
+            let pendingCount = myTasks.filter(t => t.status === 'Pending' || (!t.status)).length;
+            let successCount = myTasks.filter(t => t.status === 'Success').length;
+            let rejectedCount = myTasks.filter(t => t.status === 'Failed').length;
 
             document.getElementById('userTotalSubCount').innerText = totalSub;
             document.getElementById('userPendingCount').innerText = pendingCount;
@@ -1830,12 +1834,17 @@
         function loadUserTaskHistory() {
             let tbody = document.getElementById('userTaskHistoryBody');
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            if (tasks.length === 0) {
+            let currentName = localStorage.getItem('savedName');
+            
+            // ইউজার শুধু তার নিজের জমার ইতিহাস দেখতে পাবে
+            let myTasks = tasks.filter(t => t.userName === currentName);
+
+            if (myTasks.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td></tr>`;
                 return;
             }
             tbody.innerHTML = '';
-            tasks.forEach(task => {
+            myTasks.forEach(task => {
                 let statusVal = task.status || 'Pending';
                 let badgeClass = statusVal === 'Success' ? 'status-success' : (statusVal === 'Failed' ? 'status-failed' : 'status-loading');
                 let displayStatus = statusVal === 'Failed' ? 'Rejected' : statusVal;
@@ -1851,9 +1860,12 @@
 
         function updateTaskCounters() {
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            let gmailCount = tasks.filter(t => t.platform === 'Gmail').length;
-            let fbCount = tasks.filter(t => t.platform === 'Facebook').length;
-            let instaCount = tasks.filter(t => t.platform === 'Instagram').length;
+            let currentName = localStorage.getItem('savedName');
+            let myTasks = tasks.filter(t => t.userName === currentName);
+
+            let gmailCount = myTasks.filter(t => t.platform === 'Gmail').length;
+            let fbCount = myTasks.filter(t => t.platform === 'Facebook').length;
+            let instaCount = myTasks.filter(t => t.platform === 'Instagram').length;
 
             if(document.getElementById('gmailSubmitCount')) document.getElementById('gmailSubmitCount').innerText = gmailCount;
             if(document.getElementById('fbSubmitCount')) document.getElementById('fbSubmitCount').innerText = fbCount;
@@ -1879,26 +1891,8 @@
             }
 
             tbody.innerHTML = '';
-            tasks.tasks ? tasks.forEach((task, index) => {
-                let uName = task.userName || localStorage.getItem('savedName') || 'ইউজার';
-                let status = task.status || 'Pending';
-                
-                let approveDisabled = status === 'Success' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
-                let rejectDisabled = status === 'Failed' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="color: #00f2fe; font-weight: bold;">${uName}</td>
-                        <td>${task.platform}</td>
-                        <td>${task.details}</td>
-                        <td>
-                            <button onclick="updateTaskStatus(${index}, 'Success')" ${approveDisabled}>Approve</button>
-                            <button onclick="updateTaskStatus(${index}, 'Failed')" ${rejectDisabled}>Reject</button>
-                        </td>
-                    </tr>
-                `;
-            }) : tasks.forEach((task, index) => {
-                let uName = task.userName || localStorage.getItem('savedName') || 'ইউজার';
+            tasks.forEach((task, index) => {
+                let uName = task.userName || 'ইউজার';
                 let status = task.status || 'Pending';
                 
                 let approveDisabled = status === 'Success' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
