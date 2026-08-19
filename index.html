@@ -922,7 +922,7 @@
                 <div class="stats-row">
                     <div class="stat-box"><span>TOTAL</span><h2 id="adminTotalCount">0</h2></div>
                     <div class="stat-box"><span>SUCCESS</span><h2 id="adminSuccessCount" style="color: #064e3b;">0</h2></div>
-                    <div class="stat-box"><span>FAILED</span><h2 id="adminFailedCount" style="color: #7f1d1d;">0</h2></div>
+                    <div class="stat-box"><span>FAILED/REJECT</span><h2 id="adminFailedCount" style="color: #7f1d1d;">0</h2></div>
                 </div>
             </div>
             <div class="task-history-card">
@@ -1035,7 +1035,7 @@
         </div>
     </div>
 
-    <!-- প্রোফাইল পেজ (কাজের লাইভ কাউন্টার যুক্ত) -->
+    <!-- প্রোফাইল পেজ (সাকসেস ও রিজেক্ট কাউন্টারসহ) -->
     <div id="profilePage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1054,16 +1054,20 @@
                 <h3 style="color: #00f2fe; font-size: 15px; margin-bottom: 10px;"><i class="fa-solid fa-chart-pie"></i> কাজের স্ট্যাটাস ওভারভিউ</h3>
                 <div class="stats-row" style="border-top-color: rgba(0, 242, 254, 0.3);">
                     <div class="stat-box">
-                        <span style="color: #00f2fe;">মোট সাবমিট</span>
+                        <span style="color: #00f2fe;">মোট কাজ</span>
                         <h2 id="userTotalSubCount" style="color: #fff;">0</h2>
                     </div>
                     <div class="stat-box">
-                        <span style="color: #fbbf24;">পেন্ডিং (Pending)</span>
+                        <span style="color: #fbbf24;">পেন্ডিং</span>
                         <h2 id="userPendingCount" style="color: #fbbf24;">0</h2>
                     </div>
                     <div class="stat-box">
-                        <span style="color: #34d399;">সাকসেস (Success)</span>
+                        <span style="color: #34d399;">সাকসেস</span>
                         <h2 id="userSuccessCount" style="color: #34d399;">0</h2>
+                    </div>
+                    <div class="stat-box">
+                        <span style="color: #ef4444;">রিজেক্ট</span>
+                        <h2 id="userRejectedCount" style="color: #ef4444;">0</h2>
                     </div>
                 </div>
             </div>
@@ -1422,7 +1426,7 @@
         </div>
     </div>
 
-    <!-- ইনস্টাগ্রাম সেল পেজ (রেট ৪ টাকা আপডেট করা হয়েছে) -->
+    <!-- ইনস্টাগ্রাম সেল পেজ -->
     <div id="instagramPage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1561,10 +1565,12 @@
             let totalSub = tasks.length;
             let pendingCount = tasks.filter(t => t.status === 'Pending' || (!t.status)).length;
             let successCount = tasks.filter(t => t.status === 'Success').length;
+            let rejectedCount = tasks.filter(t => t.status === 'Failed').length;
 
             document.getElementById('userTotalSubCount').innerText = totalSub;
             document.getElementById('userPendingCount').innerText = pendingCount;
             document.getElementById('userSuccessCount').innerText = successCount;
+            document.getElementById('userRejectedCount').innerText = rejectedCount;
 
             loadUserTaskHistory();
             showPage('profilePage');
@@ -1752,7 +1758,6 @@
             });
         }
 
-        // কাজ সাবমিট করার ফাংশন (ডুপ্লিকেট ও ইউজারনেম চেকসহ)
         function submitAccount(event, platform, rate) {
             event.preventDefault();
             let details = "";
@@ -1771,15 +1776,14 @@
 
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             
-            // ডুপ্লিকেট সাবমিশন রোধ চেক
             let isAlreadySubmitted = tasks.some(t => t.details.toLowerCase() === details.toLowerCase());
             if (isAlreadySubmitted) {
                 alert('দুঃখিত! এই অ্যাকাউন্টটি ইতিমধ্যে একবার সাবমিট করা হয়েছে। দ্বিতীয়বার সাবমিট করা যাবে না।');
                 return;
             }
 
-            let currentUserName = localStorage.getItem('savedName') || 'Alamin / Joy';
-            let message = `📥 নতুন কাজ সাবমিٹ হয়েছে!\n\n👤 সাবমিটকারী: ${currentUserName}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস: ${details}`;
+            let currentUserName = localStorage.getItem('savedName') || 'User';
+            let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 সাবমিটকারী: ${currentUserName}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস: ${details}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
@@ -1823,11 +1827,12 @@
             tasks.forEach(task => {
                 let statusVal = task.status || 'Pending';
                 let badgeClass = statusVal === 'Success' ? 'status-success' : (statusVal === 'Failed' ? 'status-failed' : 'status-loading');
+                let displayStatus = statusVal === 'Failed' ? 'Rejected' : statusVal;
                 tbody.innerHTML += `
                     <tr>
                         <td>${task.platform}</td>
                         <td>${task.date}</td>
-                        <td><span class="status-badge ${badgeClass}">${statusVal}</span></td>
+                        <td><span class="status-badge ${badgeClass}">${displayStatus}</span></td>
                     </tr>
                 `;
             });
@@ -1863,16 +1868,22 @@
             }
 
             tbody.innerHTML = '';
+            tasks.keys = true;
             tasks.forEach((task, index) => {
                 let uName = task.userName || 'Unknown User';
+                let status = task.status || 'Pending';
+                
+                let approveDisabled = status === 'Success' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
+                let rejectDisabled = status === 'Failed' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
+
                 tbody.innerHTML += `
                     <tr>
                         <td style="color: #00f2fe; font-weight: bold;">${uName}</td>
                         <td>${task.platform}</td>
                         <td>${task.details}</td>
                         <td>
-                            <button onclick="updateTaskStatus(${index}, 'Success')" style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Approve</button>
-                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Reject</button>
+                            <button onclick="updateTaskStatus(${index}, 'Success')" ${approveDisabled}>Approve</button>
+                            <button onclick="updateTaskStatus(${index}, 'Failed')" ${rejectDisabled}>Reject</button>
                         </td>
                     </tr>
                 `;
@@ -1882,8 +1893,14 @@
         function updateTaskStatus(index, newStatus) {
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             
-            // যদি আগে থেকেই Success করা থাকে, তবে আবার ব্যালেন্স যোগ হওয়া আটকানোর জন্য চেক
-            if(tasks[index].status !== 'Success' && newStatus === 'Success') {
+            // একই কাজ ইতিপূর্বে সাকসেস হয়ে থাকলে পুনরায় আবার সাকসেস করে ব্যালেন্স যোগ হওয়া আটকানোর চেক
+            if (tasks[index].status === 'Success' && newStatus === 'Success') {
+                alert('এই কাজটি ইতিপূর্বেই সাকসেস করা হয়েছে!');
+                return;
+            }
+
+            // যদি স্ট্যাটাস আগে সাকসেস না থাকে এবং এখন সাকসেস করা হয়, তবেই ব্যালেন্স একবার যোগ হবে
+            if (tasks[index].status !== 'Success' && newStatus === 'Success') {
                 let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
                 let addAmt = tasks[index].rate || (tasks[index].platform === 'Gmail' ? 15.70 : (tasks[index].platform === 'Facebook' ? 5.70 : 4.00));
                 localStorage.setItem('userBalance', (currentBal + addAmt).toFixed(2));
@@ -1893,7 +1910,7 @@
             tasks[index].status = newStatus;
             localStorage.setItem('userTasks', JSON.stringify(tasks));
             loadAdminSubmissions();
-            alert(`কাজের স্ট্যাটাস আপডেট করা হয়েছে: ${newStatus}`);
+            alert(`কাজের স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে: ${newStatus}`);
         }
     </script>
 </body>
