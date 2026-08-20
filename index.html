@@ -767,6 +767,119 @@
         .status-loading { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; }
         .status-success { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid #34d399; }
         .status-failed { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+        /* --- উইন্ডোজ স্টাইল মডার্ন পপ-আপ/মোডাল ডিজাইন --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 15px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .windows-modal {
+            background: #151030;
+            border: 2px solid #00f2fe;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.3);
+            overflow: hidden;
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #191436, #0f0c29);
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.4);
+        }
+        .modal-header h3 {
+            font-size: 14px;
+            color: #00f2fe;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-close-btn {
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .modal-close-btn:hover {
+            transform: scale(1.1);
+        }
+        .modal-body {
+            padding: 18px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+        }
+        .detail-item span:first-child {
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+        .detail-item span:last-child {
+            color: #fff;
+            font-weight: 700;
+        }
+        .details-box {
+            background: #0f0c29;
+            border: 1px dashed #00f2fe;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            color: #00f2fe;
+            word-break: break-all;
+            margin-top: 10px;
+            white-space: pre-line;
+        }
+        .view-btn {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #000;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 242, 254, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -880,7 +993,7 @@
         </div>
     </div>
 
-    <!-- এডমিন সিক্রেট লগইন পেজ (শুধুমাত্র সিক্রেট লিংকের মাধ্যমে আসবে, ইউজারদের মেনুতে নেই) -->
+    <!-- এডমিন সিক্রেট লগইন পেজ -->
     <div id="adminLoginModal" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -906,7 +1019,7 @@
         </div>
     </div>
 
-    <!-- আসল সিক্রেট এডমিন ড্যাশবোর্ড -->
+    <!-- সিক্রেট এডমিন ড্যাশবোর্ড -->
     <div id="adminDashboardPage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1033,7 +1146,7 @@
         </div>
     </div>
 
-    <!-- প্রোফাইল পেজ (ইউজার শুধুমাত্র তার নিজের কাজের স্ট্যাটাস দেখবে) -->
+    <!-- প্রোফাইল পেজ -->
     <div id="profilePage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1097,15 +1210,49 @@
                             <tr>
                                 <th>Platform</th>
                                 <th>Date</th>
+                                <th>Amount</th>
                                 <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="userTaskHistoryBody">
                             <tr>
-                                <td colspan="3" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td>
+                                <td colspan="5" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- উইন্ডোজ মডার্ন টাস্ক মোডাল (পপ-আপ) -->
+    <div class="modal-overlay" id="taskModalOverlay">
+        <div class="windows-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-window-restore"></i> Task Details Window</h3>
+                <button class="modal-close-btn" onclick="closeTaskModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-item">
+                    <span>প্ল্যাটফর্ম (Platform):</span>
+                    <span id="modalPlatform">-</span>
+                </div>
+                <div class="detail-item">
+                    <span>তারিখ (Submission Date):</span>
+                    <span id="modalDate">-</span>
+                </div>
+                <div class="detail-item">
+                    <span>কাজের মূল্য (Earn Rate):</span>
+                    <span id="modalRate" style="color: #00f2fe;">৳0.00</span>
+                </div>
+                <div class="detail-item">
+                    <span>বর্তমান স্ট্যাটাস (Status):</span>
+                    <span id="modalStatus">-</span>
+                </div>
+                <div style="margin-top: 12px; font-size: 12px; color: #cbd5e1; font-weight: 600;">সাবমিটকৃত কাজের ডিটেইলস:</div>
+                <div class="details-box" id="modalDetails">
+                    কোনো তথ্য পাওয়া যায়নি।
                 </div>
             </div>
         </div>
@@ -1526,7 +1673,6 @@
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // সিক্রেট অ্যাডমিন লিংকের জন্য চেকিং (যেমন: yoursite.com/?admin=true)
             if (urlParams.get('admin') === 'true') {
                 showPage('adminLoginModal');
                 return;
@@ -1837,22 +1983,52 @@
             let myTasks = tasks.filter(t => t.userName === currentName);
 
             if (myTasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td></tr>`;
                 return;
             }
             tbody.innerHTML = '';
-            myTasks.forEach(task => {
+            myTasks.forEach((task, index) => {
                 let statusVal = task.status || 'Pending';
                 let badgeClass = statusVal === 'Success' ? 'status-success' : (statusVal === 'Failed' ? 'status-failed' : 'status-loading');
                 let displayStatus = statusVal === 'Failed' ? 'Rejected' : statusVal;
+                let taskRate = task.rate ? `৳${parseFloat(task.rate).toFixed(2)}` : '৳0.00';
+
                 tbody.innerHTML += `
                     <tr>
                         <td>${task.platform}</td>
                         <td>${task.date}</td>
+                        <td style="color: #00f2fe; font-weight: bold;">${taskRate}</td>
                         <td><span class="status-badge ${badgeClass}">${displayStatus}</span></td>
+                        <td><button class="view-btn" onclick="openTaskModal(${index})"><i class="fa-solid fa-eye"></i> বিস্তারিত</button></td>
                     </tr>
                 `;
             });
+        }
+
+        /* --- মোডাল ফাংশনালিটি --- */
+        function openTaskModal(index) {
+            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+            let currentName = localStorage.getItem('savedName');
+            let myTasks = tasks.filter(t => t.userName === currentName);
+            let selectedTask = myTasks[index];
+
+            if(!selectedTask) return;
+
+            document.getElementById('modalPlatform').innerText = selectedTask.platform;
+            document.getElementById('modalDate').innerText = selectedTask.date;
+            document.getElementById('modalRate').innerText = selectedTask.rate ? `৳${parseFloat(selectedTask.rate).toFixed(2)}` : '৳0.00';
+            
+            let statusText = selectedTask.status || 'Pending';
+            let statusColor = statusText === 'Success' ? '#34d399' : (statusText === 'Failed' ? '#ef4444' : '#fbbf24');
+            document.getElementById('modalStatus').innerHTML = `<span style="color:${statusColor}; font-weight:bold;">${statusText}</span>`;
+            
+            document.getElementById('modalDetails').innerText = selectedTask.details || 'কোনো বিবরণ নেই';
+
+            document.getElementById('taskModalOverlay').classList.add('active');
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModalOverlay').classList.remove('active');
         }
 
         function updateTaskCounters() {
