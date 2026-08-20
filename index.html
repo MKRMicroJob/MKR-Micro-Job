@@ -2096,21 +2096,38 @@
 
             tbody.innerHTML = '';
             tasks.forEach((task, index) => {
-                let uName = task.userName || 'ইউজার';
+                let uName = task.userName || 'অজ্ঞাত ইউজার';
                 let uPhone = task.userPhone || 'নম্বর নেই';
                 let status = task.status || 'Pending';
                 
-                let approveStyle = status === 'Success' ? 'background:#059669; color:#fff;' : 'background:#10b981; color:#fff;';
-                let rejectStyle = status === 'Failed' ? 'background:#b91c1c; color:#fff;' : 'background:#ef4444; color:#fff;';
+                let isProcessed = status === 'Success' || status === 'Failed';
+                let approveDisabled = isProcessed ? 'disabled' : '';
+                let rejectDisabled = isProcessed ? 'disabled' : '';
+
+                let approveStyle = status === 'Success' 
+                    ? 'background:#10b981; color:#fff; cursor:not-allowed; opacity:0.8;' 
+                    : (isProcessed ? 'background:#374151; color:#9ca3af; cursor:not-allowed;' : 'background:#10b981; color:#fff; cursor:pointer;');
+
+                let rejectStyle = status === 'Failed' 
+                    ? 'background:#ef4444; color:#fff; cursor:not-allowed; opacity:0.8;' 
+                    : (isProcessed ? 'background:#374151; color:#9ca3af; cursor:not-allowed;' : 'background:#ef4444; color:#fff; cursor:pointer;');
+
+                let statusBadge = '';
+                if(status === 'Success') {
+                    statusBadge = `<div style="color:#10b981; font-weight:bold; font-size:11px; margin-top:4px;">✓ Approved</div>`;
+                } else if(status === 'Failed') {
+                    statusBadge = `<div style="color:#ef4444; font-weight:bold; font-size:11px; margin-top:4px;">✕ Rejected</div>`;
+                }
 
                 tbody.innerHTML += `
                     <tr>
-                        <td style="color: #00f2fe; font-weight: bold;">${uName}<br><span style="font-size:10px; color:#cbd5e1;">${uPhone}</span></td>
+                        <td style="color: #00f2fe; font-weight: bold;">${uName}<br><span style="font-size:10px; color:#cbd5e1;">📱 ${uPhone}</span></td>
                         <td>${task.platform}</td>
-                        <td><div style="max-width:120px; word-break:break-all; font-size:11px;">${task.details}</div></td>
+                        <td><div style="max-width:140px; word-break:break-all; font-size:11px; white-space:pre-line;">${task.details}</div></td>
                         <td>
-                            <button onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-weight:bold; margin-right:2px; font-size:11px;">Approve</button>
-                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">Reject</button>
+                            <button ${approveDisabled} onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; margin-right:2px; font-size:11px;">Approve</button>
+                            <button ${rejectDisabled} onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; font-size:11px;">Reject</button>
+                            ${statusBadge}
                         </td>
                     </tr>
                 `;
@@ -2121,30 +2138,23 @@
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             let currentTask = tasks[index];
 
-            if (currentTask.status === newStatus) {
-                alert(`এই কাজটি ইতিমধ্যেই '${newStatus}' অবস্থায় রয়েছে!`);
+            if (currentTask.status === 'Success' || currentTask.status === 'Failed') {
+                alert(`এই কাজটি ইতিমধ্যেই '${currentTask.status === 'Success' ? 'Approved' : 'Rejected'}' করা হয়েছে! আর পরিবর্তন করা যাবে না।`);
                 return;
             }
 
-            if (currentTask.status !== 'Success' && newStatus === 'Success') {
+            if (newStatus === 'Success') {
                 let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
                 let addAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
                 localStorage.setItem('userBalance', (currentBal + addAmt).toFixed(2));
                 updateBalanceDisplay();
             } 
-            else if (currentTask.status === 'Success' && newStatus === 'Failed') {
-                let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
-                let subAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
-                let newBal = currentBal - subAmt;
-                localStorage.setItem('userBalance', (newBal > 0 ? newBal : 0).toFixed(2));
-                updateBalanceDisplay();
-            }
 
             currentTask.status = newStatus;
             localStorage.setItem('userTasks', JSON.stringify(tasks));
             loadAdminSubmissions();
             updateHomeTracker();
-            alert(`কাজের স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে: ${newStatus}`);
+            alert(`কাজের স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে: ${newStatus === 'Success' ? 'Approved' : 'Rejected'}`);
         }
     </script>
 </body>
