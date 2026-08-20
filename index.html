@@ -1157,7 +1157,6 @@
                     <h4>Instagram</h4>
                     <p>ইনস্টাগ্রাম সার্ভিস</p>
                 </div>
-                <!-- স্ক্রিনশটের নতুন অপশনগুলো জিমেইল/ফেসবুকের নিচে সফলভাবে যুক্ত করা হলো -->
                 <div class="service-card" onclick="alert('Outlook অপশন শীঘ্রই আসছে!')">
                     <i class="fa-solid fa-at" style="color: #0072c6;"></i>
                     <h4>Out Look</h4>
@@ -1254,6 +1253,7 @@
                     <table class="history-table">
                         <thead>
                             <tr>
+                                <th>Serial / ID</th>
                                 <th>Platform</th>
                                 <th>Date</th>
                                 <th>Amount</th>
@@ -1263,7 +1263,7 @@
                         </thead>
                         <tbody id="userTaskHistoryBody">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td>
+                                <td colspan="6" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1280,6 +1280,10 @@
                 <button class="modal-close-btn" onclick="closeTaskModal()">✕</button>
             </div>
             <div class="modal-body">
+                <div class="detail-item">
+                    <span>কাজের সিরিয়াল (Task #):</span>
+                    <span id="modalSerial" style="color: #00f2fe;">#1</span>
+                </div>
                 <div class="detail-item">
                     <span>প্ল্যাটফর্ম (Platform):</span>
                     <span id="modalPlatform">-</span>
@@ -1531,7 +1535,7 @@
             <div class="submit-form-card">
                 <div class="form-heading">
                     <h3>Submit Your Account</h3>
-                    <p>সঠিক তথ্য দিয়ে নিচের ফর্মটি পূরণ করুন</p>
+                    <p>সঠিক তথ্য দিয়ে নিচের ফর্মটি পূরণ করুন (সর্বোচ্চ ১০০০টি পর্যন্ত)</p>
                 </div>
                 <form id="gmailForm" onsubmit="submitAccount(event, 'Gmail', 15.70)">
                     <div class="input-group">
@@ -2003,6 +2007,14 @@
             let currentUserName = localStorage.getItem('savedName') || 'অজ্ঞাত ইউজার';
             let currentUserPhone = localStorage.getItem('savedPhone') || 'নম্বর পাওয়া যায়নি';
             
+            // ১০০০ পর্যন্ত সাবমিশন লিমিট চেক
+            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+            let myTasks = tasks.filter(t => t.userName === currentUserName);
+            if (myTasks.length >= 1000) {
+                alert('দুঃখিত! আপনি সর্বোচ্চ ১০০০টি কাজ সাবমিট করার সীমাতে পৌঁছে গেছেন।');
+                return;
+            }
+
             let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 ইউজারের নাম: ${currentUserName}\n📱 ফোন: ${currentUserPhone}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস:\n${details}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -2012,7 +2024,7 @@
             }).then(res => res.json()).then(data => {
                 saveTaskLocally(platform, details, currentUserName, currentUserPhone, event.target, rate);
             }).catch(err => {
-                saveTaskLocally(platform, details, currentUserName, currentUserPhone, event.target, rate);
+                saveTaskLocaly(platform, details, currentUserName, currentUserPhone, event.target, rate);
             });
         }
 
@@ -2046,7 +2058,7 @@
             let myTasks = tasks.filter(t => t.userName === currentName);
 
             if (myTasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td></tr>`;
                 return;
             }
             tbody.innerHTML = '';
@@ -2055,9 +2067,11 @@
                 let badgeClass = statusVal === 'Success' ? 'status-success' : (statusVal === 'Failed' ? 'status-failed' : 'status-loading');
                 let displayStatus = statusVal === 'Failed' ? 'Rejected' : statusVal;
                 let taskRate = task.rate ? `৳${parseFloat(task.rate).toFixed(2)}` : '৳0.00';
+                let serialNum = `#${index + 1}`; // ১, ২, ৩... করে সাবমিশন কাউন্ট ও সিরিয়াল শো করবে
 
                 tbody.innerHTML += `
                     <tr>
+                        <td style="color: #00f2fe; font-weight: bold;">${serialNum}</td>
                         <td>${task.platform}</td>
                         <td>${task.date}</td>
                         <td style="color: #00f2fe; font-weight: bold;">${taskRate}</td>
@@ -2076,6 +2090,7 @@
 
             if(!selectedTask) return;
 
+            document.getElementById('modalSerial').innerText = `#${index + 1}`;
             document.getElementById('modalPlatform').innerText = selectedTask.platform;
             document.getElementById('modalDate').innerText = selectedTask.date;
             document.getElementById('modalRate').innerText = selectedTask.rate ? `৳${parseFloat(selectedTask.rate).toFixed(2)}` : '৳0.00';
