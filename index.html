@@ -1567,7 +1567,6 @@
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             let currentName = localStorage.getItem('savedName');
             
-            // ইউজার শুধু নিজের কাজগুলো প্রোফাইলে ফিল্টার করে দেখবে
             let myTasks = tasks.filter(t => t.userName === currentName);
             document.getElementById('profTotalSubmitted').innerText = myTasks.length;
             
@@ -1661,7 +1660,9 @@
             localStorage.setItem('savedEmail', email);
             localStorage.setItem('savedPass', pass);
             localStorage.setItem('savedPhone', phone);
-            localStorage.setItem('userBalance', '0.00');
+            if (!localStorage.getItem('userBalance')) {
+                localStorage.setItem('userBalance', '0.00');
+            }
 
             alert('রেজিস্ট্রেশন সফল হয়েছে! এখন লগইন করুন।');
             showPage('loginPage');
@@ -1789,12 +1790,6 @@
             }
 
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            let isAlreadySubmitted = tasks.some(t => t.details.toLowerCase().includes(usernameKey.toLowerCase()));
-            if (isAlreadySubmitted) {
-                alert('দুঃখিত! এই অ্যাকাউন্টটি ইতিমধ্যে একবার সাবমিট করা হয়েছে। দ্বিতীয়বার সাবমিট করা যাবে না।');
-                return;
-            }
-
             let currentUserName = localStorage.getItem('savedName') || 'অজ্ঞাত ইউজার';
             let currentUserPhone = localStorage.getItem('savedPhone') || 'নম্বর পাওয়া যায়নি';
             
@@ -1836,7 +1831,6 @@
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             let currentName = localStorage.getItem('savedName');
             
-            // ইউজার শুধু তার নিজের জমার ইতিহাস দেখতে পাবে
             let myTasks = tasks.filter(t => t.userName === currentName);
 
             if (myTasks.length === 0) {
@@ -1895,8 +1889,8 @@
                 let uName = task.userName || 'ইউজার';
                 let status = task.status || 'Pending';
                 
-                let approveDisabled = status === 'Success' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
-                let rejectDisabled = status === 'Failed' ? 'disabled style="background:#555; cursor:not-allowed; opacity:0.6;"' : 'style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;"';
+                let approveStyle = status === 'Success' ? 'background:#059669; color:#fff;' : 'background:#10b981; color:#fff;';
+                let rejectStyle = status === 'Failed' ? 'background:#b91c1c; color:#fff;' : 'background:#ef4444; color:#fff;';
 
                 tbody.innerHTML += `
                     <tr>
@@ -1904,8 +1898,8 @@
                         <td>${task.platform}</td>
                         <td>${task.details}</td>
                         <td>
-                            <button onclick="updateTaskStatus(${index}, 'Success')" ${approveDisabled}>Approve</button>
-                            <button onclick="updateTaskStatus(${index}, 'Failed')" ${rejectDisabled}>Reject</button>
+                            <button onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; margin-right:4px;">Approve</button>
+                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">Reject</button>
                         </td>
                     </tr>
                 `;
@@ -1914,20 +1908,30 @@
 
         function updateTaskStatus(index, newStatus) {
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            
-            if (tasks[index].status === 'Success' && newStatus === 'Success') {
-                alert('এই কাজটি ইতিপূর্বেই সাকসেস করা হয়েছে!');
+            let currentTask = tasks[index];
+
+            if (currentTask.status === newStatus) {
+                alert(`এই কাজটি ইতিমধ্যেই '${newStatus}' অবস্থায় রয়েছে!`);
                 return;
             }
 
-            if (tasks[index].status !== 'Success' && newStatus === 'Success') {
+            // যদি আগে সাকসেস না থাকে এবং এখন সাকসেস করা হয়, তবে ব্যালেন্স যোগ হবে
+            if (currentTask.status !== 'Success' && newStatus === 'Success') {
                 let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
-                let addAmt = tasks[index].rate || (tasks[index].platform === 'Gmail' ? 15.70 : (tasks[index].platform === 'Facebook' ? 5.70 : 4.00));
+                let addAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
                 localStorage.setItem('userBalance', (currentBal + addAmt).toFixed(2));
+                updateBalanceDisplay();
+            } 
+            // যদি কাজটা আগে সাকসেস করা ছিল কিন্তু এখন রিজেক্ট (Failed) করা হয়, তবে ব্যালেন্স থেকে সমপরিমাণ টাকা কেটে নেওয়া হবে যাতে ভুল ব্যালেন্স না থাকে
+            else if (currentTask.status === 'Success' && newStatus === 'Failed') {
+                let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
+                let subAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
+                let newBal = currentBal - subAmt;
+                localStorage.setItem('userBalance', (newBal > 0 ? newBal : 0).toFixed(2));
                 updateBalanceDisplay();
             }
 
-            tasks[index].status = newStatus;
+            currentTask.status = newStatus;
             localStorage.setItem('userTasks', JSON.stringify(tasks));
             loadAdminSubmissions();
             alert(`কাজের স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে: ${newStatus}`);
