@@ -2099,18 +2099,9 @@
                 let uName = task.userName || 'অজ্ঞাত ইউজার';
                 let uPhone = task.userPhone || 'নম্বর নেই';
                 let status = task.status || 'Pending';
-                
-                let isProcessed = status === 'Success' || status === 'Failed';
-                let approveDisabled = isProcessed ? 'disabled' : '';
-                let rejectDisabled = isProcessed ? 'disabled' : '';
 
-                let approveStyle = status === 'Success' 
-                    ? 'background:#10b981; color:#fff; cursor:not-allowed; opacity:0.8;' 
-                    : (isProcessed ? 'background:#374151; color:#9ca3af; cursor:not-allowed;' : 'background:#10b981; color:#fff; cursor:pointer;');
-
-                let rejectStyle = status === 'Failed' 
-                    ? 'background:#ef4444; color:#fff; cursor:not-allowed; opacity:0.8;' 
-                    : (isProcessed ? 'background:#374151; color:#9ca3af; cursor:not-allowed;' : 'background:#ef4444; color:#fff; cursor:pointer;');
+                let approveStyle = 'background:#10b981; color:#fff; cursor:pointer;';
+                let rejectStyle = 'background:#ef4444; color:#fff; cursor:pointer;';
 
                 let statusBadge = '';
                 if(status === 'Success') {
@@ -2125,8 +2116,8 @@
                         <td>${task.platform}</td>
                         <td><div style="max-width:140px; word-break:break-all; font-size:11px; white-space:pre-line;">${task.details}</div></td>
                         <td>
-                            <button ${approveDisabled} onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; margin-right:2px; font-size:11px;">Approve</button>
-                            <button ${rejectDisabled} onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; font-size:11px;">Reject</button>
+                            <button onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; margin-right:2px; font-size:11px;">Approve</button>
+                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; font-size:11px;">Reject</button>
                             ${statusBadge}
                         </td>
                     </tr>
@@ -2137,18 +2128,24 @@
         function updateTaskStatus(index, newStatus) {
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             let currentTask = tasks[index];
+            let previousStatus = currentTask.status;
 
-            if (currentTask.status === 'Success' || currentTask.status === 'Failed') {
-                alert(`এই কাজটি ইতিমধ্যেই '${currentTask.status === 'Success' ? 'Approved' : 'Rejected'}' করা হয়েছে! আর পরিবর্তন করা যাবে না।`);
+            if (previousStatus === newStatus) {
+                alert(`এই কাজটি ইতিমধ্যেই '${newStatus === 'Success' ? 'Approved' : 'Rejected'}' অবস্থায় আছে।`);
                 return;
             }
 
-            if (newStatus === 'Success') {
-                let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
-                let addAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
-                localStorage.setItem('userBalance', (currentBal + addAmt).toFixed(2));
-                updateBalanceDisplay();
-            } 
+            let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
+            let taskRate = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
+
+            if (newStatus === 'Success' && previousStatus !== 'Success') {
+                currentBal += taskRate;
+            } else if (newStatus === 'Failed' && previousStatus === 'Success') {
+                currentBal = Math.max(0, currentBal - taskRate);
+            }
+
+            localStorage.setItem('userBalance', currentBal.toFixed(2));
+            updateBalanceDisplay();
 
             currentTask.status = newStatus;
             localStorage.setItem('userTasks', JSON.stringify(tasks));
