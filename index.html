@@ -7,6 +7,11 @@
     <meta name="author" content="Abul Kalam">
     <meta name="description" content="MKR Micro Job - Abul Kalam এর মাইক্রো জব ওয়েবসাইট। এখানে কাজ করে সহজে আয় করুন।">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -801,7 +806,7 @@
                 <h3>✨ স্বাগত! প্রথমে একাউন্ট তৈরি করুন ✨</h3>
                 <p>নাম, জিমেইল, ফোন নাম্বার ও পাসওয়ার্ড দিয়ে তথ্য সাবমিট করুন</p>
             </div>
-            <form onsubmit="checkDeviceLimit(event)">
+            <form onsubmit="handleRegister(event)">
                 <div class="input-group">
                     <label>Full Name</label>
                     <div class="input-field">
@@ -855,14 +860,14 @@
         <div class="auth-card">
             <div class="form-heading">
                 <h3>স্বাগত!</h3>
-                <p>আপনার জিমেইল ও পাসওয়ার্ড দিয়ে লগইন করুন</p>
+                <p>আপনার ফোন নাম্বার ও পাসওয়ার্ড দিয়ে লগইন করুন</p>
             </div>
             <form onsubmit="handleLogin(event)">
                 <div class="input-group">
-                    <label>Email (Gmail)</label>
+                    <label>Phone Number</label>
                     <div class="input-field">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="loginEmail" placeholder="আপনার জিমেইল দিন" autocomplete="email" required>
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="loginPhone" placeholder="আপনার ফোন নাম্বার দিন" autocomplete="tel" required>
                     </div>
                 </div>
                 <div class="input-group">
@@ -880,7 +885,7 @@
         </div>
     </div>
 
-    <!-- এডমিন সিক্রেট লগইন পেজ (শুধুমাত্র সিক্রেট লিংকের মাধ্যমে আসবে, ইউজারদের মেনুতে নেই) -->
+    <!-- এডমিন সিক্রেট লগইন পেজ -->
     <div id="adminLoginModal" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -895,7 +900,7 @@
             </div>
             <form onsubmit="handleAdminLogin(event)">
                 <div class="input-group">
-                    <label>Secret Password (পাসওয়ার্ড)</label>
+                    <label>Secret Password</label>
                     <div class="input-field">
                         <i class="fa-solid fa-key"></i>
                         <input type="password" id="adminLoginPass" placeholder="সিক্রেট পাসওয়ার্ড দিন" required>
@@ -919,9 +924,10 @@
                 <h3><i class="fa-solid fa-shield-halved"></i> Welcome Admin!</h3>
                 <p>ইউজারদের কাজের হিসাব ও স্ট্যাটাস আপডেট করুন</p>
                 <div class="stats-row">
-                    <div class="stat-box"><span>TOTAL</span><h2 id="adminTotalCount">0</h2></div>
+                    <div class="stat-box"><span>TOTAL USERS</span><h2 id="adminTotalUsers">0</h2></div>
+                    <div class="stat-box"><span>TOTAL TASKS</span><h2 id="adminTotalCount">0</h2></div>
                     <div class="stat-box"><span>SUCCESS</span><h2 id="adminSuccessCount" style="color: #064e3b;">0</h2></div>
-                    <div class="stat-box"><span>FAILED/REJECT</span><h2 id="adminFailedCount" style="color: #7f1d1d;">0</h2></div>
+                    <div class="stat-box"><span>FAILED</span><h2 id="adminFailedCount" style="color: #7f1d1d;">0</h2></div>
                 </div>
             </div>
             <div class="task-history-card">
@@ -930,14 +936,13 @@
                     <table class="history-table">
                         <thead>
                             <tr>
-                                <th>User Name</th>
+                                <th>User</th>
                                 <th>Platform</th>
                                 <th>Details</th>
                                 <th>Status Action</th>
                             </tr>
                         </thead>
                         <tbody id="adminSubmissionsList">
-                            <!-- ডাইনামিক ডাটা আসবে -->
                         </tbody>
                     </table>
                 </div>
@@ -1033,7 +1038,7 @@
         </div>
     </div>
 
-    <!-- প্রোফাইল পেজ (ইউজার শুধুমাত্র তার নিজের কাজের স্ট্যাটাস দেখবে) -->
+    <!-- প্রোফাইল পেজ -->
     <div id="profilePage" class="section-page">
         <header class="navbar">
             <div class="nav-left">
@@ -1073,15 +1078,15 @@
             <div class="profile-info-card">
                 <div class="profile-info-row">
                     <span>Full Name:</span>
-                    <span id="profName">Abul Kalam</span>
+                    <span id="profName">...</span>
                 </div>
                 <div class="profile-info-row">
                     <span>Phone Number:</span>
-                    <span id="profPhone">017XXXXXXXX</span>
+                    <span id="profPhone">...</span>
                 </div>
                 <div class="profile-info-row">
                     <span>Email Address:</span>
-                    <span id="profEmail">user@gmail.com</span>
+                    <span id="profEmail">...</span>
                 </div>
                 <div class="profile-info-row">
                     <span>Total Submitted Tasks:</span>
@@ -1102,7 +1107,7 @@
                         </thead>
                         <tbody id="userTaskHistoryBody">
                             <tr>
-                                <td colspan="3" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td>
+                                <td colspan="3" style="text-align: center; color: #94a3b8;">লোড হচ্ছে...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1136,21 +1141,6 @@
                         </tr>
                     </thead>
                     <tbody id="leaderboardBody">
-                        <tr>
-                            <td>1</td>
-                            <td>Rakib Hossain</td>
-                            <td>45 Referrals</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Tanvir Ahmed</td>
-                            <td>32 Referrals</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Nazmul Islam</td>
-                            <td>28 Referrals</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -1220,14 +1210,6 @@
                         <div class="input-field">
                             <i class="fa-solid fa-phone"></i>
                             <input type="tel" id="senderNumber" placeholder="e.g. 01XXXXXXXXX" autocomplete="tel" required>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label>পেমেন্ট স্ক্রিনশট</label>
-                        <div class="input-field">
-                            <i class="fa-solid fa-image"></i>
-                            <input type="file" id="depScreenshot" accept="image/*" style="padding-top: 9px;" required>
                         </div>
                     </div>
 
@@ -1495,9 +1477,30 @@
 
     <!-- জাভাস্ক্রিপ্ট কোড -->
     <script>
+        // -------------------------------------------------------------
+        // FIREBASE CONFIGURATION (এখানে আপনার ফায়ারবেস ক্রেডেনশিয়াল দিন)
+        // -------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Firebase ইনিশিয়ালাইজেশন
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
         const BOT_TOKEN = '8588226486:AAGMJz-_cZva4fU2UCSuwAhBVewlgFqKgJg';
         const CHAT_ID = '7714324222';
         const ADMIN_PANEL_SECRET_NUMBER = '01841161787';
+
+        let currentUserPhone = localStorage.getItem('loggedPhone') || null;
 
         function updateDailyPasswords() {
             const now = new Date();
@@ -1526,7 +1529,6 @@
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // সিক্রেট অ্যাডমিন লিংকের জন্য চেকিং (যেমন: yoursite.com/?admin=true)
             if (urlParams.get('admin') === 'true') {
                 showPage('adminLoginModal');
                 return;
@@ -1537,23 +1539,14 @@
                 localStorage.setItem('referredBy', refUser);
             }
 
-            let isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (isLoggedIn === 'true') {
+            if (currentUserPhone) {
+                listenUserData();
                 showPage('homePage');
             } else {
                 showPage('registerPage');
             }
 
-            let userPhone = localStorage.getItem('savedPhone') || 'user';
-            let refLinkField = document.getElementById('myReferLink');
-            if(refLinkField) {
-                refLinkField.value = window.location.origin + window.location.pathname + '?ref=' + userPhone;
-            }
-
             updateDailyPasswords();
-            updateTaskCounters();
-            loadUserTaskHistory();
-            updateBalanceDisplay();
         };
 
         function showPage(pageId) {
@@ -1562,35 +1555,6 @@
             document.getElementById(pageId).classList.add('active');
             window.scrollTo(0, 0);
             document.getElementById('profileDropdown').classList.remove('active');
-        }
-
-        function openProfilePage() {
-            document.getElementById('profName').innerText = localStorage.getItem('savedName') || 'Abul Kalam';
-            document.getElementById('profPhone').innerText = localStorage.getItem('savedPhone') || '017XXXXXXXX';
-            document.getElementById('profEmail').innerText = localStorage.getItem('savedEmail') || 'user@gmail.com';
-            
-            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            let currentName = localStorage.getItem('savedName');
-            
-            let myTasks = tasks.filter(t => t.userName === currentName);
-            document.getElementById('profTotalSubmitted').innerText = myTasks.length;
-            
-            let totalSub = myTasks.length;
-            let pendingCount = myTasks.filter(t => t.status === 'Pending' || (!t.status)).length;
-            let successCount = myTasks.filter(t => t.status === 'Success').length;
-            let rejectedCount = myTasks.filter(t => t.status === 'Failed').length;
-
-            document.getElementById('userTotalSubCount').innerText = totalSub;
-            document.getElementById('userPendingCount').innerText = pendingCount;
-            document.getElementById('userSuccessCount').innerText = successCount;
-            document.getElementById('userRejectedCount').innerText = rejectedCount;
-
-            loadUserTaskHistory();
-            showPage('profilePage');
-        }
-
-        function openLeaderboardPage() {
-            showPage('leaderboardPage');
         }
 
         function toggleSidebar() {
@@ -1610,45 +1574,12 @@
             }
         }
 
-        function handleLogout() {
-            localStorage.removeItem('isLoggedIn');
-            alert('সফলভাবে লগআউট হয়েছে!');
-            showPage('loginPage');
-        }
-
-        function handleAdminLogin(event) {
+        // --- Firebase User Auth Flow ---
+        function handleRegister(event) {
             event.preventDefault();
-            let passInput = document.getElementById('adminLoginPass').value;
-            if (passInput === ADMIN_PANEL_SECRET_NUMBER) {
-                alert('এডমিন প্যানেলে সফলভাবে প্রবেশ করেছেন!');
-                loadAdminSubmissions();
-                showPage('adminDashboardPage');
-            } else {
-                alert('ভুল সিক্রেট পাসওয়ার্ড দিয়েছেন! সঠিক নাম্বারটি দিয়ে পাসওয়ার্ড দিন।');
-            }
-        }
-
-        function copyPassword(id, btn) {
-            var text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text);
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-            setTimeout(() => { 
-                btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy'; 
-            }, 2000);
-        }
-
-        function copyReferLink(btn) {
-            let refInput = document.getElementById('myReferLink');
-            refInput.select();
-            navigator.clipboard.writeText(refInput.value);
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-            setTimeout(() => { 
-                btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy'; 
-            }, 2000);
-        }
-
-        function checkDeviceLimit(event) {
-            event.preventDefault();
+            let name = document.getElementById('regName').value;
+            let phone = document.getElementById('regPhone').value.trim();
+            let email = document.getElementById('regEmail').value;
             let pass = document.getElementById('regPass').value;
             let passConfirm = document.getElementById('regPassConfirm').value;
 
@@ -1657,48 +1588,177 @@
                 return;
             }
 
-            let name = document.getElementById('regName').value;
-            let phone = document.getElementById('regPhone').value;
-            let email = document.getElementById('regEmail').value;
-
-            localStorage.setItem('savedName', name);
-            localStorage.setItem('savedEmail', email);
-            localStorage.setItem('savedPass', pass);
-            localStorage.setItem('savedPhone', phone);
-            if (!localStorage.getItem('userBalance')) {
-                localStorage.setItem('userBalance', '0.00');
-            }
-
-            alert('রেজিস্ট্রেশন সফল হয়েছে! এখন লগইন করুন।');
-            showPage('loginPage');
+            db.ref('users/' + phone).once('value', snapshot => {
+                if(snapshot.exists()) {
+                    alert('এই ফোন নম্বর দিয়ে ইতিমধ্যেই অ্যাকাউন্ট খোলা রয়েছে!');
+                } else {
+                    let refBy = localStorage.getItem('referredBy') || 'None';
+                    db.ref('users/' + phone).set({
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        password: pass,
+                        balance: 0.00,
+                        referredBy: refBy,
+                        createdAt: new Date().toISOString()
+                    }, (error) => {
+                        if (!error) {
+                            if(refBy !== 'None') {
+                                db.ref('users/' + refBy + '/referrals').push({
+                                    referredPhone: phone,
+                                    date: new Date().toLocaleDateString()
+                                });
+                            }
+                            alert('রেজিস্ট্রেশন সফল হয়েছে! এখন লগইন করুন।');
+                            showPage('loginPage');
+                        } else {
+                            alert('সমস্যা হয়েছে: ' + error.message);
+                        }
+                    });
+                }
+            });
         }
 
         function handleLogin(event) {
             event.preventDefault();
-            let inputEmail = document.getElementById('loginEmail').value;
-            let inputPass = document.getElementById('loginPass').value;
-            let savedEmail = localStorage.getItem('savedEmail');
-            let savedPass = localStorage.getItem('savedPass');
+            let phone = document.getElementById('loginPhone').value.trim();
+            let pass = document.getElementById('loginPass').value;
 
-            if (savedEmail && (inputEmail !== savedEmail || inputPass !== savedPass)) {
-                alert('ভুল জিমেইল অথবা পাসওয়ার্ড দিয়েছেন!');
-                return;
-            }
-
-            localStorage.setItem('isLoggedIn', 'true');
-            alert('লগইন সফল হয়েছে!');
-            showPage('homePage');
+            db.ref('users/' + phone).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    let user = snapshot.val();
+                    if (user.password === pass) {
+                        currentUserPhone = phone;
+                        localStorage.setItem('loggedPhone', phone);
+                        alert('লগইন সফল হয়েছে!');
+                        listenUserData();
+                        showPage('homePage');
+                    } else {
+                        alert('ভুল পাসওয়ার্ড দিয়েছেন!');
+                    }
+                } else {
+                    alert('এই নম্বর দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি!');
+                }
+            });
         }
 
-        function updateBalanceDisplay() {
-            let balance = parseFloat(localStorage.getItem('userBalance') || '0.00');
-            let balEl = document.getElementById('userTotalBalance');
-            if(balEl) balEl.innerText = `৳${balance.toFixed(2)}`;
+        function handleLogout() {
+            localStorage.removeItem('loggedPhone');
+            currentUserPhone = null;
+            alert('সফলভাবে লগআউট হয়েছে!');
+            showPage('loginPage');
+        }
+
+        function listenUserData() {
+            if(!currentUserPhone) return;
+
+            document.getElementById('myReferLink').value = window.location.origin + window.location.pathname + '?ref=' + currentUserPhone;
+
+            db.ref('users/' + currentUserPhone).on('value', snapshot => {
+                if(snapshot.exists()){
+                    let data = snapshot.val();
+                    document.getElementById('userTotalBalance').innerText = `৳${parseFloat(data.balance || 0).toFixed(2)}`;
+                    document.getElementById('profName').innerText = data.name || '';
+                    document.getElementById('profPhone').innerText = data.phone || '';
+                    document.getElementById('profEmail').innerText = data.email || '';
+                }
+            });
+
+            // Live task sync for user
+            db.ref('tasks').on('value', snapshot => {
+                let tasks = snapshot.val() || {};
+                let userTasks = [];
+                let gmailCount = 0, fbCount = 0, instaCount = 0;
+
+                for(let key in tasks) {
+                    if(tasks[key].userPhone === currentUserPhone) {
+                        userTasks.push(tasks[key]);
+                        if(tasks[key].platform === 'Gmail') gmailCount++;
+                        if(tasks[key].platform === 'Facebook') fbCount++;
+                        if(tasks[key].platform === 'Instagram') instaCount++;
+                    }
+                }
+
+                document.getElementById('gmailSubmitCount').innerText = gmailCount;
+                document.getElementById('fbSubmitCount').innerText = fbCount;
+                document.getElementById('instaSubmitCount').innerText = instaCount;
+
+                document.getElementById('profTotalSubmitted').innerText = userTasks.length;
+                document.getElementById('userTotalSubCount').innerText = userTasks.length;
+                document.getElementById('userPendingCount').innerText = userTasks.filter(t => t.status === 'Pending').length;
+                document.getElementById('userSuccessCount').innerText = userTasks.filter(t => t.status === 'Success').length;
+                document.getElementById('userRejectedCount').innerText = userTasks.filter(t => t.status === 'Failed').length;
+
+                renderUserTaskHistory(userTasks);
+            });
+        }
+
+        function renderUserTaskHistory(tasks) {
+            let tbody = document.getElementById('userTaskHistoryBody');
+            if(tasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            tasks.reverse().forEach(task => {
+                let badgeClass = task.status === 'Success' ? 'status-success' : (task.status === 'Failed' ? 'status-failed' : 'status-loading');
+                let displayStatus = task.status === 'Failed' ? 'Rejected' : task.status;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${task.platform}</td>
+                        <td>${task.date}</td>
+                        <td><span class="status-badge ${badgeClass}">${displayStatus}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openProfilePage() {
+            showPage('profilePage');
+        }
+
+        function openLeaderboardPage() {
+            db.ref('users').once('value', snapshot => {
+                let users = snapshot.val() || {};
+                let leaderList = [];
+                for(let key in users) {
+                    let refCount = users[key].referrals ? Object.keys(users[key].referrals).length : 0;
+                    leaderList.push({ name: users[key].name, count: refCount });
+                }
+                leaderList.sort((a,b) => b.count - a.count);
+
+                let tbody = document.getElementById('leaderboardBody');
+                tbody.innerHTML = '';
+                leaderList.slice(0, 100).forEach((u, idx) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td>${u.name}</td>
+                            <td>${u.count} Referrals</td>
+                        </tr>
+                    `;
+                });
+            });
+            showPage('leaderboardPage');
+        }
+
+        function copyPassword(id, btn) {
+            var text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text);
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy'; }, 2000);
+        }
+
+        function copyReferLink(btn) {
+            let refInput = document.getElementById('myReferLink');
+            refInput.select();
+            navigator.clipboard.writeText(refInput.value);
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy'; }, 2000);
         }
 
         function calculateDepositFee() {
-            let amountInput = document.getElementById('depAmount').value;
-            let amount = parseFloat(amountInput);
+            let amount = parseFloat(document.getElementById('depAmount').value);
             if (isNaN(amount) || amount <= 0) {
                 document.getElementById('depCalcAmount').innerText = "৳0.00";
                 document.getElementById('depCalcFee').innerText = "+ ৳0.00";
@@ -1715,24 +1775,30 @@
             let method = document.getElementById('depMethod').value;
             let sender = document.getElementById('senderNumber').value;
             let amount = document.getElementById('depAmount').value;
-            let message = `💰 নতুন ডিপোজিট রিকোয়েস্ট এসেছে!\n\n🔹 মাধ্যম: ${method}\n📱 প্রেরক নাম্বার: ${sender}\n💵 পরিমাণ: ৳${amount}`;
 
+            db.ref('deposits').push({
+                userPhone: currentUserPhone,
+                method: method,
+                sender: sender,
+                amount: amount,
+                date: new Date().toLocaleDateString(),
+                status: 'Pending'
+            });
+
+            let message = `💰 নতুন ডিপোজিট রিকোয়েস্ট এসেছে!\n\n🔹 মাধ্যম: ${method}\n📱 প্রেরক নাম্বার: ${sender}\n💵 পরিমাণ: ৳${amount}`;
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: CHAT_ID, text: message })
-            }).then(res => res.json()).then(data => {
-                if(data.ok) {
-                    alert('ডিপোজিট রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!');
-                    event.target.reset();
-                    showPage('homePage');
-                }
             });
+
+            alert('ডিপোজিট রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!');
+            event.target.reset();
+            showPage('homePage');
         }
 
         function calculateWithdrawFee() {
-            let amountInput = document.getElementById('withAmount').value;
-            let amount = parseFloat(amountInput);
+            let amount = parseFloat(document.getElementById('withAmount').value);
             if (isNaN(amount) || amount <= 0) {
                 document.getElementById('calcAmount').innerText = "৳0.00";
                 document.getElementById('calcFee').innerText = "৳0.00";
@@ -1756,20 +1822,37 @@
                 alert("সর্বনিম্ন উইথড্র পরিমাণ ৫০ টাকা।");
                 return;
             }
-            let charge = amount * 0.05;
-            let finalAmount = amount - charge;
-            let message = `💸 নতুন উইথড্র রিকোয়েস্ট এসেছে!\n\n🔹 মাধ্যম: ${method}\n📱 নাম্বার: ${number}\n💵 পরিমাণ: ৳${amount}\n🔻 ৫% চার্জ: ৳${charge.toFixed(2)}\n✅ প্রদেয়: ৳${finalAmount.toFixed(2)}`;
 
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: message })
-            }).then(res => res.json()).then(data => {
-                if(data.ok) {
-                    alert('উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!');
-                    event.target.reset();
-                    showPage('homePage');
+            db.ref('users/' + currentUserPhone).once('value', snapshot => {
+                let userBal = parseFloat(snapshot.val().balance || 0);
+                if(userBal < amount) {
+                    alert("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!");
+                    return;
                 }
+
+                let charge = amount * 0.05;
+                let finalAmount = amount - charge;
+
+                db.ref('withdraws').push({
+                    userPhone: currentUserPhone,
+                    method: method,
+                    number: number,
+                    amount: amount,
+                    finalAmount: finalAmount,
+                    date: new Date().toLocaleDateString(),
+                    status: 'Pending'
+                });
+
+                let message = `💸 নতুন উইথড্র রিকোয়েস্ট এসেছে!\n\n🔹 মাধ্যম: ${method}\n📱 নাম্বার: ${number}\n💵 পরিমাণ: ৳${amount}\n🔻 ৫% চার্জ: ৳${charge.toFixed(2)}\n✅ প্রদেয়: ৳${finalAmount.toFixed(2)}`;
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+                });
+
+                alert('উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!');
+                event.target.reset();
+                showPage('homePage');
             });
         }
 
@@ -1793,149 +1876,111 @@
                 details = `Username: ${username}\n🔑 পাসওয়ার্ড: ${pass}\n🛡️ 2FA: ${twoFa}`;
             }
 
-            let currentUserName = localStorage.getItem('savedName') || 'অজ্ঞাত ইউজার';
-            let currentUserPhone = localStorage.getItem('savedPhone') || 'নম্বর পাওয়া যায়নি';
-            
-            let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 ইউজারের নাম: ${currentUserName}\n📱 ফোন: ${currentUserPhone}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস:\n${details}`;
+            db.ref('users/' + currentUserPhone).once('value', snapshot => {
+                let userName = snapshot.val() ? snapshot.val().name : 'User';
 
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: message })
-            }).then(res => res.json()).then(data => {
-                saveTaskLocally(platform, details, currentUserName, event.target, rate);
-            }).catch(err => {
-                saveTaskLocally(platform, details, currentUserName, event.target, rate);
+                db.ref('tasks').push({
+                    userPhone: currentUserPhone,
+                    userName: userName,
+                    platform: platform,
+                    details: details,
+                    rate: rate,
+                    date: new Date().toLocaleDateString(),
+                    status: 'Pending'
+                }, (err) => {
+                    if(!err) {
+                        let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 নাম: ${userName}\n📱 ফোন: ${currentUserPhone}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস:\n${details}`;
+                        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+                        });
+
+                        alert('আপনার কাজ সফলভাবে সাবমিট হয়েছে!');
+                        event.target.reset();
+                        showPage('homePage');
+                    }
+                });
             });
         }
 
-        function saveTaskLocally(platform, details, userName, formElement, rate) {
-            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            let newTask = {
-                userName: userName,
-                platform: platform,
-                details: details,
-                rate: rate,
-                date: new Date().toLocaleDateString(),
-                status: 'Pending'
-            };
-            tasks.push(newTask);
-            localStorage.setItem('userTasks', JSON.stringify(tasks));
-
-            alert('আপনার কাজ সফলভাবে সাবমিট হয়েছে!');
-            if(formElement) formElement.reset();
-            updateTaskCounters();
-            loadUserTaskHistory();
-            showPage('homePage');
+        // --- Admin Panel Logic ---
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            let passInput = document.getElementById('adminLoginPass').value;
+            if (passInput === ADMIN_PANEL_SECRET_NUMBER) {
+                alert('এডমিন প্যানেলে সফলভাবে প্রবেশ করেছেন!');
+                loadAdminDashboard();
+                showPage('adminDashboardPage');
+            } else {
+                alert('ভুল সিক্রেট পাসওয়ার্ড দিয়েছেন!');
+            }
         }
 
-        function loadUserTaskHistory() {
-            let tbody = document.getElementById('userTaskHistoryBody');
-            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            let currentName = localStorage.getItem('savedName');
-            
-            let myTasks = tasks.filter(t => t.userName === currentName);
+        function loadAdminDashboard() {
+            db.ref('users').on('value', snap => {
+                let users = snap.val() || {};
+                document.getElementById('adminTotalUsers').innerText = Object.keys(users).length;
+            });
 
-            if (myTasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #94a3b8;">কোনো কাজ সাবমিট করা হয়নি এখনো।</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = '';
-            myTasks.forEach(task => {
-                let statusVal = task.status || 'Pending';
-                let badgeClass = statusVal === 'Success' ? 'status-success' : (statusVal === 'Failed' ? 'status-failed' : 'status-loading');
-                let displayStatus = statusVal === 'Failed' ? 'Rejected' : statusVal;
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${task.platform}</td>
-                        <td>${task.date}</td>
-                        <td><span class="status-badge ${badgeClass}">${displayStatus}</span></td>
-                    </tr>
-                `;
+            db.ref('tasks').on('value', snapshot => {
+                let tasks = snapshot.val() || {};
+                let tbody = document.getElementById('adminSubmissionsList');
+                tbody.innerHTML = '';
+
+                let total = 0, success = 0, failed = 0;
+
+                for (let taskId in tasks) {
+                    total++;
+                    let task = tasks[taskId];
+                    if (task.status === 'Success') success++;
+                    if (task.status === 'Failed') failed++;
+
+                    let actionContent = '';
+                    if (task.status === 'Pending') {
+                        actionContent = `
+                            <button onclick="updateTaskStatus('${taskId}', '${task.userPhone}', ${task.rate}, 'Success')" style="background:#10b981; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; margin-right:4px;">Approve</button>
+                            <button onclick="updateTaskStatus('${taskId}', '${task.userPhone}', ${task.rate}, 'Failed')" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">Reject</button>
+                        `;
+                    } else if (task.status === 'Success') {
+                        actionContent = `<span style="color:#34d399; font-weight:bold;"><i class="fa-solid fa-lock"></i> Approved</span>`;
+                    } else {
+                        actionContent = `<span style="color:#ef4444; font-weight:bold;"><i class="fa-solid fa-lock"></i> Rejected</span>`;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="color: #00f2fe; font-weight: bold;">${task.userName}<br><small style="color:#aaa;">${task.userPhone}</small></td>
+                            <td>${task.platform}</td>
+                            <td>${task.details.replace(/\n/g, '<br>')}</td>
+                            <td>${actionContent}</td>
+                        </tr>
+                    `;
+                }
+
+                document.getElementById('adminTotalCount').innerText = total;
+                document.getElementById('adminSuccessCount').innerText = success;
+                document.getElementById('adminFailedCount').innerText = failed;
             });
         }
 
-        function updateTaskCounters() {
-            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            let currentName = localStorage.getItem('savedName');
-            let myTasks = tasks.filter(t => t.userName === currentName);
+        function updateTaskStatus(taskId, userPhone, rate, status) {
+            db.ref('tasks/' + taskId).once('value', snapshot => {
+                let task = snapshot.val();
+                if (task.status !== 'Pending') {
+                    alert('এই কাজটি ইতিমধ্যে প্রসেস করে লক করা হয়ে গেছে!');
+                    return;
+                }
 
-            let gmailCount = myTasks.filter(t => t.platform === 'Gmail').length;
-            let fbCount = myTasks.filter(t => t.platform === 'Facebook').length;
-            let instaCount = myTasks.filter(t => t.platform === 'Instagram').length;
-
-            if(document.getElementById('gmailSubmitCount')) document.getElementById('gmailSubmitCount').innerText = gmailCount;
-            if(document.getElementById('fbSubmitCount')) document.getElementById('fbSubmitCount').innerText = fbCount;
-            if(document.getElementById('instaSubmitCount')) document.getElementById('instaSubmitCount').innerText = instaCount;
-        }
-
-        function loadAdminSubmissions() {
-            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            let tbody = document.getElementById('adminSubmissionsList');
-            let successEl = document.getElementById('adminSuccessCount');
-            let failedEl = document.getElementById('adminFailedCount');
-            let totalEl = document.getElementById('adminTotalCount');
-
-            totalEl.innerText = tasks.length;
-            let successCount = tasks.filter(t => t.status === 'Success').length;
-            let failedCount = tasks.filter(t => t.status === 'Failed').length;
-            successEl.innerText = successCount;
-            failedEl.innerText = failedCount;
-
-            if (tasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center;">কোনো সাবমিশন নেই।</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = '';
-            tasks.forEach((task, index) => {
-                let uName = task.userName || 'ইউজার';
-                let status = task.status || 'Pending';
-                
-                let approveStyle = status === 'Success' ? 'background:#059669; color:#fff;' : 'background:#10b981; color:#fff;';
-                let rejectStyle = status === 'Failed' ? 'background:#b91c1c; color:#fff;' : 'background:#ef4444; color:#fff;';
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="color: #00f2fe; font-weight: bold;">${uName}</td>
-                        <td>${task.platform}</td>
-                        <td>${task.details}</td>
-                        <td>
-                            <button onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; margin-right:4px;">Approve</button>
-                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">Reject</button>
-                        </td>
-                    </tr>
-                `;
+                db.ref('tasks/' + taskId).update({ status: status }, (err) => {
+                    if (!err && status === 'Success') {
+                        db.ref('users/' + userPhone + '/balance').transaction(currentBal => {
+                            return (currentBal || 0) + parseFloat(rate);
+                        });
+                    }
+                    alert(`কাজের স্ট্যাটাস ${status} করা হয়েছে এবং স্থায়ীভাবে লক করা হয়েছে!`);
+                });
             });
-        }
-
-        function updateTaskStatus(index, newStatus) {
-            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-            let currentTask = tasks[index];
-
-            if (currentTask.status === newStatus) {
-                alert(`এই কাজটি ইতিমধ্যেই '${newStatus}' অবস্থায় রয়েছে!`);
-                return;
-            }
-
-            if (currentTask.status !== 'Success' && newStatus === 'Success') {
-                let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
-                let addAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
-                localStorage.setItem('userBalance', (currentBal + addAmt).toFixed(2));
-                updateBalanceDisplay();
-            } 
-            else if (currentTask.status === 'Success' && newStatus === 'Failed') {
-                let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
-                let subAmt = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
-                let newBal = currentBal - subAmt;
-                localStorage.setItem('userBalance', (newBal > 0 ? newBal : 0).toFixed(2));
-                updateBalanceDisplay();
-            }
-
-            currentTask.status = newStatus;
-            localStorage.setItem('userTasks', JSON.stringify(tasks));
-            loadAdminSubmissions();
-            alert(`কাজের স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে: ${newStatus}`);
         }
     </script>
 </body>
