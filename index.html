@@ -337,7 +337,7 @@
             color: #cbd5e1;
         }
 
-        .refer-card {
+        .refer-card, .home-task-tracker {
             background: #191436;
             border: 2px solid rgba(0, 242, 254, 0.6);
             margin: 0 15px 20px 15px;
@@ -768,7 +768,6 @@
         .status-success { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid #34d399; }
         .status-failed { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
 
-        /* --- উইন্ডোজ স্টাইল মডার্ন পপ-আপ/মোডাল ডিজাইন --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -899,6 +898,7 @@
             <li onclick="toggleSidebar(); showPage('instagramPage');"><i class="fa-brands fa-instagram"></i> ইনস্টাগ্রাম সেল</li>
             <li onclick="toggleSidebar(); showPage('registerPage');"><i class="fa-solid fa-user-plus"></i> রেজিস্ট্রেশন পেজ</li>
             <li onclick="toggleSidebar(); showPage('loginPage');"><i class="fa-solid fa-right-to-bracket"></i> লগইন পেজ</li>
+            <li onclick="toggleSidebar(); showPage('adminLoginModal');"><i class="fa-solid fa-user-shield"></i> অ্যাডমিন লগইন</li>
         </ul>
     </div>
 
@@ -1043,14 +1043,13 @@
                     <table class="history-table">
                         <thead>
                             <tr>
-                                <th>User Name</th>
+                                <th>User Info</th>
                                 <th>Platform</th>
                                 <th>Details</th>
                                 <th>Status Action</th>
                             </tr>
                         </thead>
                         <tbody id="adminSubmissionsList">
-                            <!-- ডাইনামিক ডাটা আসবে -->
                         </tbody>
                     </table>
                 </div>
@@ -1091,6 +1090,22 @@
                 <div class="action-btns">
                     <button class="btn-dep" onclick="showPage('depositPage')">Deposit <span>ব্যালেেন্স যোগ করুন</span></button>
                     <button class="btn-with" onclick="showPage('withdrawPage')">Withdraw <span>ব্যালেেন্স উত্তোলন করুন</span></button>
+                </div>
+            </div>
+
+            <!-- হোম স্ক্রিনে নতুন কাজের হিসাব অপশন -->
+            <div class="home-task-tracker" onclick="openProfilePage()" style="cursor: pointer;">
+                <div class="refer-header" style="margin-bottom: 8px;">
+                    <i class="fa-solid fa-list-check"></i>
+                    <div>
+                        <h4>আমার কাজের স্ট্যাটাস (My Task Status)</h4>
+                        <p>আপনার জমা দেওয়া কাজগুলোর বর্তমান অবস্থা দেখতে ক্লিক করুন</p>
+                    </div>
+                </div>
+                <div class="stats-row" style="border-top: 1px solid rgba(0, 242, 254, 0.3); padding-top: 10px;">
+                    <div class="stat-box" style="text-align: center;"><span style="color:#00f2fe;">জমা দেওয়া</span><h2 id="homeTotalSub" style="color:#fff; font-size: 14px;">0</h2></div>
+                    <div class="stat-box" style="text-align: center;"><span style="color:#34d399;">এপ্রুভড</span><h2 id="homeSuccessSub" style="color:#34d399; font-size: 14px;">0</h2></div>
+                    <div class="stat-box" style="text-align: center;"><span style="color:#ef4444;">রিজেক্টেড</span><h2 id="homeRejectSub" style="color:#ef4444; font-size: 14px;">0</h2></div>
                 </div>
             </div>
 
@@ -1226,7 +1241,7 @@
         </div>
     </div>
 
-    <!-- উইন্ডোজ মডার্ন টাস্ক মোডাল (পপ-আপ) -->
+    <!-- টাস্ক মোডাল -->
     <div class="modal-overlay" id="taskModalOverlay">
         <div class="windows-modal">
             <div class="modal-header">
@@ -1700,6 +1715,7 @@
             updateTaskCounters();
             loadUserTaskHistory();
             updateBalanceDisplay();
+            updateHomeTracker();
         };
 
         function showPage(pageId) {
@@ -1733,6 +1749,20 @@
 
             loadUserTaskHistory();
             showPage('profilePage');
+        }
+
+        function updateHomeTracker() {
+            let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+            let currentName = localStorage.getItem('savedName');
+            let myTasks = tasks.filter(t => t.userName === currentName);
+
+            let totalSub = myTasks.length;
+            let successCount = myTasks.filter(t => t.status === 'Success').length;
+            let rejectedCount = myTasks.filter(t => t.status === 'Failed').length;
+
+            if(document.getElementById('homeTotalSub')) document.getElementById('homeTotalSub').innerText = totalSub;
+            if(document.getElementById('homeSuccessSub')) document.getElementById('homeSuccessSub').innerText = successCount;
+            if(document.getElementById('homeRejectSub')) document.getElementById('homeRejectSub').innerText = rejectedCount;
         }
 
         function openLeaderboardPage() {
@@ -1949,16 +1979,17 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: CHAT_ID, text: message })
             }).then(res => res.json()).then(data => {
-                saveTaskLocally(platform, details, currentUserName, event.target, rate);
+                saveTaskLocally(platform, details, currentUserName, currentUserPhone, event.target, rate);
             }).catch(err => {
-                saveTaskLocally(platform, details, currentUserName, event.target, rate);
+                saveTaskLocally(platform, details, currentUserName, currentUserPhone, event.target, rate);
             });
         }
 
-        function saveTaskLocally(platform, details, userName, formElement, rate) {
+        function saveTaskLocally(platform, details, userName, userPhone, formElement, rate) {
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             let newTask = {
                 userName: userName,
+                userPhone: userPhone,
                 platform: platform,
                 details: details,
                 rate: rate,
@@ -1972,6 +2003,7 @@
             if(formElement) formElement.reset();
             updateTaskCounters();
             loadUserTaskHistory();
+            updateHomeTracker();
             showPage('homePage');
         }
 
@@ -2005,7 +2037,6 @@
             });
         }
 
-        /* --- মোডাল ফাংশনালিটি --- */
         function openTaskModal(index) {
             let tasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
             let currentName = localStorage.getItem('savedName');
@@ -2066,6 +2097,7 @@
             tbody.innerHTML = '';
             tasks.forEach((task, index) => {
                 let uName = task.userName || 'ইউজার';
+                let uPhone = task.userPhone || 'নম্বর নেই';
                 let status = task.status || 'Pending';
                 
                 let approveStyle = status === 'Success' ? 'background:#059669; color:#fff;' : 'background:#10b981; color:#fff;';
@@ -2073,12 +2105,12 @@
 
                 tbody.innerHTML += `
                     <tr>
-                        <td style="color: #00f2fe; font-weight: bold;">${uName}</td>
+                        <td style="color: #00f2fe; font-weight: bold;">${uName}<br><span style="font-size:10px; color:#cbd5e1;">${uPhone}</span></td>
                         <td>${task.platform}</td>
-                        <td>${task.details}</td>
+                        <td><div style="max-width:120px; word-break:break-all; font-size:11px;">${task.details}</div></td>
                         <td>
-                            <button onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; margin-right:4px;">Approve</button>
-                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">Reject</button>
+                            <button onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-weight:bold; margin-right:2px; font-size:11px;">Approve</button>
+                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">Reject</button>
                         </td>
                     </tr>
                 `;
@@ -2111,6 +2143,7 @@
             currentTask.status = newStatus;
             localStorage.setItem('userTasks', JSON.stringify(tasks));
             loadAdminSubmissions();
+            updateHomeTracker();
             alert(`কাজের স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে: ${newStatus}`);
         }
     </script>
