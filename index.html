@@ -1045,7 +1045,7 @@
                             <tr>
                                 <th>User Info</th>
                                 <th>Platform</th>
-                                <th>Details</th>
+                                <th>Details / Address</th>
                                 <th>Status Action</th>
                             </tr>
                         </thead>
@@ -1300,7 +1300,7 @@
                     <span>বর্তমান স্ট্যাটাস (Status):</span>
                     <span id="modalStatus">-</span>
                 </div>
-                <div style="margin-top: 12px; font-size: 12px; color: #cbd5e1; font-weight: 600;">সাবমিটকৃত কাজের ডিটেইলস:</div>
+                <div style="margin-top: 12px; font-size: 12px; color: #cbd5e1; font-weight: 600;">সাবমিটকৃত কাজের ডিটেইলস ও অ্যাড্রেস:</div>
                 <div class="details-box" id="modalDetails">
                     কোনো তথ্য পাওয়া যায়নি।
                 </div>
@@ -2015,7 +2015,7 @@
                 return;
             }
 
-            let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 ইউজারের নাম: ${currentUserName}\n📱 ফোন: ${currentUserPhone}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস:\n${details}`;
+            let message = `📥 নতুন কাজ সাবমিট হয়েছে!\n\n👤 ইউজারের নাম: ${currentUserName}\n📱 ফোন: ${currentUserPhone}\n🔹 প্ল্যাটফর্ম: ${platform}\n📝 ডিটেইলস ও অ্যাড্রেস:\n${details}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
@@ -2024,7 +2024,7 @@
             }).then(res => res.json()).then(data => {
                 saveTaskLocally(platform, details, currentUserName, currentUserPhone, event.target, rate);
             }).catch(err => {
-                saveTaskLocaly(platform, details, currentUserName, currentUserPhone, event.target, rate);
+                saveTaskLocally(platform, details, currentUserName, currentUserPhone, event.target, rate);
             });
         }
 
@@ -2067,7 +2067,7 @@
                 let badgeClass = statusVal === 'Success' ? 'status-success' : (statusVal === 'Failed' ? 'status-failed' : 'status-loading');
                 let displayStatus = statusVal === 'Failed' ? 'Rejected' : statusVal;
                 let taskRate = task.rate ? `৳${parseFloat(task.rate).toFixed(2)}` : '৳0.00';
-                let serialNum = `#${index + 1}`; // ১, ২, ৩... করে সাবমিশন কাউন্ট ও সিরিয়াল শো করবে
+                let serialNum = `#${index + 1}`;
 
                 tbody.innerHTML += `
                     <tr>
@@ -2149,23 +2149,25 @@
                 let approveStyle = 'background:#10b981; color:#fff; cursor:pointer;';
                 let rejectStyle = 'background:#ef4444; color:#fff; cursor:pointer;';
 
-                let statusBadge = '';
-                if(status === 'Success') {
-                    statusBadge = `<div style="color:#10b981; font-weight:bold; font-size:11px; margin-top:4px;">✓ Approved</div>`;
-                } else if(status === 'Failed') {
-                    statusBadge = `<div style="color:#ef4444; font-weight:bold; font-size:11px; margin-top:4px;">✕ Rejected</div>`;
+                // একবার Approve বা Reject করা হয়ে গেলে বাটনগুলো আর দেখাবে না, শুধু স্ট্যাটাস দেখাবে
+                let actionContent = '';
+                if (status === 'Success') {
+                    actionContent = `<div style="color:#10b981; font-weight:bold; font-size:12px;">✓ Approved</div>`;
+                } else if (status === 'Failed') {
+                    actionContent = `<div style="color:#ef4444; font-weight:bold; font-size:12px;">✕ Rejected</div>`;
+                } else {
+                    actionContent = `
+                        <button onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; margin-right:2px; font-size:11px;">Approve</button>
+                        <button onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; font-size:11px;">Reject</button>
+                    `;
                 }
 
                 tbody.innerHTML += `
                     <tr>
                         <td style="color: #00f2fe; font-weight: bold;">${uName}<br><span style="font-size:10px; color:#cbd5e1;">📱 ${uPhone}</span></td>
                         <td>${task.platform}</td>
-                        <td><div style="max-width:140px; word-break:break-all; font-size:11px; white-space:pre-line;">${task.details}</div></td>
-                        <td>
-                            <button onclick="updateTaskStatus(${index}, 'Success')" style="${approveStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; margin-right:2px; font-size:11px;">Approve</button>
-                            <button onclick="updateTaskStatus(${index}, 'Failed')" style="${rejectStyle} border:none; padding:5px 8px; border-radius:4px; font-weight:bold; font-size:11px;">Reject</button>
-                            ${statusBadge}
-                        </td>
+                        <td><div style="max-width:160px; word-break:break-all; font-size:11px; white-space:pre-line; background:#0f0c29; padding:6px; border-radius:6px; border:1px solid rgba(0,242,254,0.3);">${task.details}</div></td>
+                        <td>${actionContent}</td>
                     </tr>
                 `;
             });
@@ -2176,18 +2178,16 @@
             let currentTask = tasks[index];
             let previousStatus = currentTask.status;
 
-            if (previousStatus === newStatus) {
-                alert(`এই কাজটি ইতিমধ্যেই '${newStatus === 'Success' ? 'Approved' : 'Rejected'}' অবস্থায় আছে।`);
+            if (previousStatus === 'Success' || previousStatus === 'Failed') {
+                alert(`এই কাজটি ইতিমধ্যেই '${previousStatus === 'Success' ? 'Approved' : 'Rejected'}' করা হয়েছে। পুনরায় পরিবর্তন করা যাবে না।`);
                 return;
             }
 
             let currentBal = parseFloat(localStorage.getItem('userBalance') || '0.00');
             let taskRate = currentTask.rate || (currentTask.platform === 'Gmail' ? 15.70 : (currentTask.platform === 'Facebook' ? 5.70 : 4.00));
 
-            if (newStatus === 'Success' && previousStatus !== 'Success') {
+            if (newStatus === 'Success') {
                 currentBal += taskRate;
-            } else if (newStatus === 'Failed' && previousStatus === 'Success') {
-                currentBal = Math.max(0, currentBal - taskRate);
             }
 
             localStorage.setItem('userBalance', currentBal.toFixed(2));
